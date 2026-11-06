@@ -38,5 +38,9 @@ class DatabaseSeeder extends Seeder
         }
 
         $this->call(VehiculosDemoSeeder::class);
+
+        // Las ventas de demostración se registran a nombre del vendedor demo.
+        auth()->setUser(User::where('email', 'vendedor@autonexo.test')->first());
+        $this->call(VentasDemoSeeder::class);
     }
 }

@@ -62,6 +62,21 @@ class Vehiculo extends Model
         return mb_strtoupper(preg_replace('/[\s\-]+/', '', (string) $valor));
     }
 
+    public function reservas(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Reserva::class)->latest('id');
+    }
+
+    public function reservaActiva(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(Reserva::class)->where('estado', 'activa');
+    }
+
+    public function venta(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(Venta::class);
+    }
+
     public function nombreEstado(): string
     {
         return self::ESTADOS[$this->estado] ?? $this->estado;
