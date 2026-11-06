@@ -11,7 +11,7 @@ class Negocio extends Model
     /** @use HasFactory<\Database\Factories\NegocioFactory> */
     use HasFactory;
 
-    protected $fillable = ['nombre', 'nit', 'ciudad', 'telefono'];
+    protected $fillable = ['nombre', 'nit', 'ciudad', 'telefono', 'plazo_imt_dias'];
 
     public function usuarios(): HasMany
     {

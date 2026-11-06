@@ -61,5 +61,20 @@ class VentasDemoSeeder extends Seeder
 
         // Una reserva activa.
         $ventas->reservar($disponibles[2], ['ci' => '4987321', 'nombre' => 'Pedro Limachi'], '500.00', 'USD', today()->addDays(5)->toDateString());
+
+        // Cobros (PBI-07) a nombre de la cajera demo, y una transferencia con el IMT por vencer (PBI-10).
+        $vendedor = auth()->user();
+        auth()->setUser(\App\Models\User::where('email', 'cajero@autonexo.test')->first());
+
+        \App\Models\TipoCambio::firstOrCreate(['fecha' => today()], ['valor' => '12.26', 'fuente' => 'Oficial']);
+        $cobros = app(\App\Servicios\Cobros::class);
+        [$antigua, $reciente] = Venta::with('cuotas')->orderBy('id')->get();
+
+        $cobros->registrar($antigua, ['medio' => 'efectivo', 'moneda_pago' => 'USD', 'monto' => bcmul((string) $antigua->cuotas[0]->monto, '2', 2)]);
+        $cobros->registrar($antigua, ['medio' => 'efectivo', 'moneda_pago' => 'BOB', 'monto' => '3000']);
+        $cobros->registrar($reciente, ['medio' => 'efectivo', 'moneda_pago' => 'USD', 'monto' => (string) $reciente->cuotas[0]->monto]);
+
+        auth()->setUser($vendedor);
+        app(\App\Servicios\Transferencias::class)->iniciar($antigua, today()->subWeekdays(9)->toDateString());
     }
 }

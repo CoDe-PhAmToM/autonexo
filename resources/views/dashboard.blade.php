@@ -7,6 +7,12 @@
         ->selectRaw('estado, count(*) as total')
         ->groupBy('estado')
         ->pluck('total', 'estado');
+
+    // CA-10.2: transferencias con el pago del IMT pendiente y el plazo cerca (o vencido).
+    $alertasImt = auth()->user()->can('transferencias.gestionar')
+        ? \App\Models\Transferencia::with('pasos', 'venta.vehiculo', 'venta.comprador')
+            ->where('estado', 'en_curso')->get()->filter->alertaImt()
+        : collect();
 @endphp
 
 <x-layouts.app title="Panel">
@@ -26,8 +32,21 @@
             @endforeach
         </div>
 
+        @foreach ($alertasImt as $t)
+            <flux:callout variant="danger" icon="exclamation-triangle">
+                <flux:callout.heading>
+                    IMT: {{ $t->textoPlazoImt() }}
+                    · límite {{ $t->fecha_limite_imt->format('d/m/Y') }}
+                </flux:callout.heading>
+                <flux:callout.text>
+                    {{ $t->venta->vehiculo->descripcion() }} ({{ $t->venta->vehiculo->placa ?? 'sin placa' }}) · {{ $t->venta->comprador->nombre }} · paso pendiente: Pago del IMT.
+                    <a class="underline" href="{{ route('transferencias.ver', $t) }}" wire:navigate>Ver transferencia</a>
+                </flux:callout.text>
+            </flux:callout>
+        @endforeach
+
         <flux:callout icon="information-circle" heading="En construcción">
-            <flux:callout.text>Aquí aparecerán el total por cobrar, las cuotas vencidas y las transferencias pendientes (etapas 4 y 5).</flux:callout.text>
+            <flux:callout.text>Aquí aparecerán el total por cobrar y las cuotas vencidas (etapas 4 y 5).</flux:callout.text>
         </flux:callout>
     </div>
 </x-layouts.app>
