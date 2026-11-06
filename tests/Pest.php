@@ -41,7 +41,13 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+/** Crea un usuario con un rol de AutoNexo, en un negocio nuevo o en el indicado. */
+function usuarioCon(string $rol, ?\App\Models\Negocio $negocio = null): \App\Models\User
 {
-    // ..
+    $user = \App\Models\User::factory()
+        ->for($negocio ?? \App\Models\Negocio::factory())
+        ->create();
+    $user->assignRole($rol);
+
+    return $user;
 }

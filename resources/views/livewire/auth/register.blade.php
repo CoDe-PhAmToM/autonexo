@@ -1,33 +1,52 @@
 <?php
 
+use App\Models\Negocio;
 use App\Models\User;
+use App\Support\Roles;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
 
+/**
+ * PBI-02: el registro da de alta un negocio nuevo y deja a quien se registra como su dueño.
+ * Los demás usuarios (cajero, vendedor, almacenero) los crea el dueño desde "Usuarios".
+ */
 new #[Layout('components.layouts.auth')] class extends Component {
+    public string $negocio = '';
     public string $name = '';
     public string $email = '';
     public string $password = '';
     public string $password_confirmation = '';
 
-    /**
-     * Handle an incoming registration request.
-     */
     public function register(): void
     {
         $validated = $this->validate([
+            'negocio' => ['required', 'string', 'max:255'],
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
             'password' => ['required', 'string', 'confirmed', Rules\Password::defaults()],
-        ]);
+        ], [], ['negocio' => 'nombre del negocio', 'name' => 'nombre']);
 
-        $validated['password'] = Hash::make($validated['password']);
+        $user = DB::transaction(function () use ($validated) {
+            $negocio = Negocio::create(['nombre' => $validated['negocio']]);
 
-        event(new Registered(($user = User::create($validated))));
+            $user = User::create([
+                'negocio_id' => $negocio->id,
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'password' => Hash::make($validated['password']),
+            ]);
+
+            $user->assignRole(Roles::DUENO);
+
+            return $user;
+        });
+
+        event(new Registered($user));
 
         Auth::login($user);
 
@@ -36,59 +55,27 @@ new #[Layout('components.layouts.auth')] class extends Component {
 }; ?>
 
 <div class="flex flex-col gap-6">
-    <x-auth-header title="Create an account" description="Enter your details below to create your account" />
+    <x-auth-header title="Registra tu negocio" description="Crea la cuenta del dueño; después agregas a tu equipo" />
 
     <!-- Session Status -->
     <x-auth-session-status class="text-center" :status="session('status')" />
 
     <form wire:submit="register" class="flex flex-col gap-6">
-        <!-- Name -->
-        <div class="grid gap-2">
-            <flux:input wire:model="name" id="name" label="{{ __('Name') }}" type="text" name="name" required autofocus autocomplete="name" placeholder="Full name" />
-        </div>
+        <flux:input wire:model="negocio" label="Nombre del negocio" type="text" required autofocus placeholder="Automotores El Alto" />
 
-        <!-- Email Address -->
-        <div class="grid gap-2">
-            <flux:input wire:model="email" id="email" label="{{ __('Email address') }}" type="email" name="email" required autocomplete="email" placeholder="email@example.com" />
-        </div>
+        <flux:input wire:model="name" label="Tu nombre" type="text" required autocomplete="name" placeholder="Nombre y apellido" />
 
-        <!-- Password -->
-        <div class="grid gap-2">
-            <flux:input
-                wire:model="password"
-                id="password"
-                label="{{ __('Password') }}"
-                type="password"
-                name="password"
-                required
-                autocomplete="new-password"
-                placeholder="Password"
-            />
-        </div>
+        <flux:input wire:model="email" label="Correo electrónico" type="email" required autocomplete="email" placeholder="correo@ejemplo.com" />
 
-        <!-- Confirm Password -->
-        <div class="grid gap-2">
-            <flux:input
-                wire:model="password_confirmation"
-                id="password_confirmation"
-                label="{{ __('Confirm password') }}"
-                type="password"
-                name="password_confirmation"
-                required
-                autocomplete="new-password"
-                placeholder="Confirm password"
-            />
-        </div>
+        <flux:input wire:model="password" label="Contraseña" type="password" required autocomplete="new-password" placeholder="Mínimo 8 caracteres" />
 
-        <div class="flex items-center justify-end">
-            <flux:button type="submit" variant="primary" class="w-full">
-                {{ __('Create account') }}
-            </flux:button>
-        </div>
+        <flux:input wire:model="password_confirmation" label="Repite la contraseña" type="password" required autocomplete="new-password" />
+
+        <flux:button type="submit" variant="primary" class="w-full">Crear cuenta</flux:button>
     </form>
 
     <div class="space-x-1 text-center text-sm text-zinc-600 dark:text-zinc-400">
-        Already have an account?
-        <x-text-link href="{{ route('login') }}">Log in</x-text-link>
+        ¿Ya tienes cuenta?
+        <x-text-link href="{{ route('login') }}">Inicia sesión</x-text-link>
     </div>
 </div>

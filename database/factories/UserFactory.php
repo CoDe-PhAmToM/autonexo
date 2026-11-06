@@ -24,12 +24,21 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
+            'negocio_id' => \App\Models\Negocio::factory(),
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
         ];
+    }
+
+    /**
+     * Asigna un rol de AutoNexo (dueño, cajero, vendedor o almacenero).
+     */
+    public function conRol(string $rol): static
+    {
+        return $this->afterCreating(fn ($user) => $user->assignRole($rol));
     }
 
     /**
