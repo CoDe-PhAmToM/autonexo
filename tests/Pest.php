@@ -41,6 +41,31 @@ expect()->extend('toBeOne', function () {
 |
 */
 
+/**
+ * Venta a crédito del Entregable: USD 9.500, inicial 2.500 y 14 cuotas de 500.
+ * Requiere un usuario autenticado (la venta queda en su negocio).
+ */
+function ventaDelEntregable(array $cambios = []): \App\Models\Venta
+{
+    $vehiculo = \App\Models\Vehiculo::factory()->create([
+        'negocio_id' => auth()->user()->negocio_id,
+        'precio_usd' => '9500.00',
+    ]);
+
+    return app(\App\Servicios\Ventas::class)->vender($vehiculo, array_merge([
+        'comprador' => ['ci' => (string) fake()->unique()->numberBetween(1000000, 9999999), 'nombre' => 'Juan Carlos Mamani'],
+        'tipo' => 'credito',
+        'moneda' => 'USD',
+        'regla_tc' => 'oficial',
+        'precio' => '9500',
+        'inicial' => '2500',
+        'numero_cuotas' => 14,
+        'monto_cuota' => '500',
+        'primer_vencimiento' => today()->addMonth()->toDateString(),
+        'fecha_venta' => today()->toDateString(),
+    ], $cambios));
+}
+
 /** Crea un usuario con un rol de AutoNexo, en un negocio nuevo o en el indicado. */
 function usuarioCon(string $rol, ?\App\Models\Negocio $negocio = null): \App\Models\User
 {

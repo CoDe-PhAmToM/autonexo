@@ -52,6 +52,16 @@ class Venta extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function cobros(): HasMany
+    {
+        return $this->hasMany(Cobro::class)->latest('id');
+    }
+
+    public function transferencia(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(Transferencia::class);
+    }
+
     public function cuotas(): HasMany
     {
         return $this->hasMany(Cuota::class)->orderBy('numero');

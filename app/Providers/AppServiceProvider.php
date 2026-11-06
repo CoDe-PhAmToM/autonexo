@@ -26,6 +26,8 @@ class AppServiceProvider extends ServiceProvider
             'vehiculo' => \App\Models\Vehiculo::class,
             'reserva' => \App\Models\Reserva::class,
             'venta' => \App\Models\Venta::class,
+            'cobro' => \App\Models\Cobro::class,
+            'transferencia' => \App\Models\Transferencia::class,
         ]);
 
         // Ver ventas: quien vende, cobra o revisa la cartera.

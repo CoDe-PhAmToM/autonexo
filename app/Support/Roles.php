@@ -28,6 +28,8 @@ final class Roles
         'ventas.registrar' => 'Registrar reservas y ventas',
         'cobros.registrar' => 'Registrar cobros',
         'cobros.anular' => 'Anular cobros con motivo',
+        'cobros.confirmar' => 'Confirmar los pagos por QR',
+        'datos.importar' => 'Cargar datos desde la plantilla de Excel',
         'cartera.ver' => 'Ver la cartera y la mora',
         'transferencias.gestionar' => 'Seguir las transferencias',
         'repuestos.gestionar' => 'Manejar el kárdex de repuestos',
@@ -40,7 +42,8 @@ final class Roles
     public const MATRIZ = [
         self::DUENO => [
             'usuarios.gestionar', 'vehiculos.ver', 'vehiculos.gestionar', 'ventas.registrar',
-            'cobros.registrar', 'cobros.anular', 'cartera.ver', 'transferencias.gestionar',
+            'cobros.registrar', 'cobros.anular', 'cobros.confirmar', 'datos.importar',
+            'cartera.ver', 'transferencias.gestionar',
             'repuestos.gestionar', 'caja.cerrar', 'respaldos.gestionar', 'metricas.ver',
         ],
         self::CAJERO => ['vehiculos.ver', 'cobros.registrar', 'cartera.ver', 'caja.cerrar'],

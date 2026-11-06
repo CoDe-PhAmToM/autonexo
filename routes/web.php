@@ -1,6 +1,9 @@
 <?php
 
+use App\Importacion\PlantillaCarga;
+use App\Models\Cobro;
 use App\Models\Vehiculo;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Volt\Volt;
@@ -47,6 +50,29 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware('can:ver-ventas')->group(function () {
         Volt::route('ventas', 'ventas.index')->name('ventas.index');
         Volt::route('ventas/{venta}', 'ventas.ver')->name('ventas.ver');
+    });
+
+    // PBI-07: cobros
+    Route::middleware('can:cobros.registrar')->group(function () {
+        Volt::route('cobros', 'cobros.index')->name('cobros.index');
+        Volt::route('ventas/{venta}/cobrar', 'ventas.cobrar')->name('ventas.cobrar');
+    });
+    Route::get('cobros/{cobro}/comprobante', function (Cobro $cobro) {
+        abort_unless($cobro->comprobante_path && Storage::disk('local')->exists($cobro->comprobante_path), 404);
+
+        return Storage::disk('local')->response($cobro->comprobante_path);
+    })->middleware('can:ver-ventas')->name('cobros.comprobante');
+
+    // PBI-10: transferencias
+    Route::middleware('can:transferencias.gestionar')->group(function () {
+        Volt::route('transferencias', 'transferencias.index')->name('transferencias.index');
+        Volt::route('transferencias/{transferencia}', 'transferencias.ver')->name('transferencias.ver');
+    });
+
+    // PBI-13: carga inicial desde Excel
+    Route::middleware('can:datos.importar')->group(function () {
+        Volt::route('carga-inicial', 'carga.index')->name('carga.index');
+        Route::get('carga-inicial/plantilla', fn () => Excel::download(new PlantillaCarga, 'plantilla_autonexo.xlsx'))->name('carga.plantilla');
     });
 
     // PBI-11: kárdex de repuestos
