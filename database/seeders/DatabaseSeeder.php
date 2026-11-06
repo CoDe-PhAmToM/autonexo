@@ -2,22 +2,41 @@
 
 namespace Database\Seeders;
 
+use App\Models\Negocio;
 use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Support\Roles;
 use Illuminate\Database\Seeder;
 
+/**
+ * Datos de demostración: un negocio con un usuario por rol.
+ * Contraseña de prueba de todos: "password" (solo para la demo local).
+ *
+ *   php artisan db:seed
+ */
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // User::factory(10)->create();
+        $negocio = Negocio::firstOrCreate(
+            ['nombre' => 'Automotores Illimani (demo)'],
+            ['nit' => '4589217', 'ciudad' => 'El Alto', 'telefono' => '71234567'],
+        );
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        $usuarios = [
+            Roles::DUENO => ['Fernando Quispe', 'dueno@autonexo.test'],
+            Roles::CAJERO => ['Rosa Mamani', 'cajero@autonexo.test'],
+            Roles::VENDEDOR => ['Luis Condori', 'vendedor@autonexo.test'],
+            Roles::ALMACENERO => ['Marco Choque', 'almacen@autonexo.test'],
+        ];
+
+        foreach ($usuarios as $rol => [$nombre, $correo]) {
+            $user = User::firstOrCreate(
+                ['email' => $correo],
+                ['negocio_id' => $negocio->id, 'name' => $nombre, 'password' => 'password', 'email_verified_at' => now()],
+            );
+            $user->syncRoles([$rol]);
+        }
+
+        $this->call(VehiculosDemoSeeder::class);
     }
 }

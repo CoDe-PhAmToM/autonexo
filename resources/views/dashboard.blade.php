@@ -1,18 +1,31 @@
-<x-layouts.app>
-    <div class="flex h-full w-full flex-1 flex-col gap-4 rounded-xl">
-        <div class="grid auto-rows-min gap-4 md:grid-cols-3">
-            <div class="relative aspect-video overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700">
-                <x-placeholder-pattern class="absolute inset-0 size-full stroke-gray-900/20 dark:stroke-neutral-100/20" />
-            </div>
-            <div class="relative aspect-video overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700">
-                <x-placeholder-pattern class="absolute inset-0 size-full stroke-gray-900/20 dark:stroke-neutral-100/20" />
-            </div>
-            <div class="relative aspect-video overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700">
-                <x-placeholder-pattern class="absolute inset-0 size-full stroke-gray-900/20 dark:stroke-neutral-100/20" />
-            </div>
+@php
+    use App\Models\Vehiculo;
+
+    $porEstado = Vehiculo::query()
+        ->selectRaw('estado, count(*) as total')
+        ->groupBy('estado')
+        ->pluck('total', 'estado');
+@endphp
+
+<x-layouts.app title="Panel">
+    <div class="flex flex-col gap-6">
+        <div>
+            <flux:heading size="xl">Hola, {{ str(auth()->user()->name)->before(' ') }}</flux:heading>
+            <flux:subheading>{{ auth()->user()->negocio?->nombre }} · {{ now()->translatedFormat('l j \d\e F \d\e Y') }}</flux:subheading>
         </div>
-        <div class="relative h-full flex-1 rounded-xl border border-neutral-200 dark:border-neutral-700">
-            <x-placeholder-pattern class="absolute inset-0 size-full stroke-gray-900/20 dark:stroke-neutral-100/20" />
+
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            @foreach (Vehiculo::ESTADOS as $clave => $nombre)
+                <flux:card>
+                    <div class="text-sm text-zinc-500">{{ $nombre }}</div>
+                    <div class="mt-1 text-3xl font-semibold">{{ $porEstado[$clave] ?? 0 }}</div>
+                    <div class="text-xs text-zinc-500">vehículos</div>
+                </flux:card>
+            @endforeach
         </div>
+
+        <flux:callout icon="information-circle" heading="En construcción">
+            <flux:callout.text>Aquí aparecerán el total por cobrar, las cuotas vencidas y las transferencias pendientes (etapas 4 y 5).</flux:callout.text>
+        </flux:callout>
     </div>
 </x-layouts.app>
