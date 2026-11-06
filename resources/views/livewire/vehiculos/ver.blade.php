@@ -17,11 +17,25 @@ new #[Title('Vehículo')] class extends Component {
         'estado' => 'Estado', 'foto_path' => 'Foto', 'observaciones' => 'Observaciones',
     ];
 
+    public function cancelarReserva(\App\Servicios\Ventas $ventas): void
+    {
+        abort_unless(auth()->user()->can('ventas.registrar'), 403);
+
+        $reserva = $this->vehiculo->reservaActiva()->firstOrFail();
+        $ventas->cancelarReserva($reserva);
+        $this->vehiculo->refresh();
+
+        session()->flash('estado', 'Reserva cancelada; el vehículo vuelve a exhibición.');
+        $this->redirectRoute('vehiculos.ver', $this->vehiculo, navigate: true);
+    }
+
     public function with(): array
     {
         return [
             'historial' => $this->vehiculo->bitacora()->with('user')->get(),
             'campos' => self::CAMPOS,
+            'reserva' => $this->vehiculo->reservaActiva()->with('comprador')->first(),
+            'venta' => $this->vehiculo->venta()->with('comprador')->first(),
         ];
     }
 }; ?>
@@ -37,11 +51,37 @@ new #[Title('Vehículo')] class extends Component {
             @can('vehiculos.gestionar')
                 <flux:button :href="route('vehiculos.editar', $vehiculo)" wire:navigate icon="pencil-square">Corregir</flux:button>
             @endcan
+            @can('ventas.registrar')
+                @if ($vehiculo->estado === 'en_exhibicion')
+                    <flux:button :href="route('vehiculos.reservar', $vehiculo)" wire:navigate icon="bookmark">Reservar</flux:button>
+                @endif
+                @if (in_array($vehiculo->estado, ['en_exhibicion', 'reservado']))
+                    <flux:button :href="route('ventas.crear', $vehiculo)" wire:navigate variant="primary" icon="banknotes">Vender</flux:button>
+                @endif
+            @endcan
+            @if ($venta)
+                <flux:button :href="route('ventas.ver', $venta)" wire:navigate variant="primary" icon="document-text">Ver venta</flux:button>
+            @endif
         </div>
     </div>
 
     @if (session('estado'))
         <flux:callout variant="success" icon="check-circle" :heading="session('estado')" />
+    @endif
+
+    @if ($reserva)
+        <flux:callout icon="bookmark" color="amber">
+            <flux:callout.heading>Reservado para {{ $reserva->comprador->nombre }} (CI {{ $reserva->comprador->ci }})</flux:callout.heading>
+            <flux:callout.text>
+                Anticipo de {{ $reserva->moneda === 'BOB' ? Formato::bs($reserva->anticipo) : Formato::usd($reserva->anticipo) }}
+                · vence el {{ $reserva->fecha_limite->format('d/m/Y') }}
+            </flux:callout.text>
+            @can('ventas.registrar')
+                <x-slot name="actions">
+                    <flux:button size="sm" wire:click="cancelarReserva" wire:confirm="¿Cancelar la reserva? El vehículo vuelve a exhibición.">Cancelar reserva</flux:button>
+                </x-slot>
+            @endcan
+        </flux:callout>
     @endif
 
     <div class="grid gap-6 lg:grid-cols-3">
@@ -83,7 +123,10 @@ new #[Title('Vehículo')] class extends Component {
                             Vehículo registrado
                         @elseif ($evento->accion === 'actualizado')
                             @foreach ($evento->cambios as $campo => $cambio)
-                                <div>{{ $campos[$campo] ?? $campo }}: <span class="text-zinc-500 line-through">{{ $cambio['antes'] ?? '—' }}</span> → {{ $cambio['despues'] ?? '—' }}</div>
+                                <div>{{ $campos[$campo] ?? $campo }}: @php
+                                    $legible = fn ($v) => $campo === 'estado' ? (Vehiculo::ESTADOS[$v] ?? $v) : ($v ?? '—');
+                                @endphp
+                                <div>{{ $campos[$campo] ?? $campo }}: <span class="text-zinc-500 line-through">{{ $legible($cambio['antes']) }}</span> → {{ $legible($cambio['despues']) }}</div>
                             @endforeach
                         @else
                             {{ ucfirst($evento->accion) }} @if ($evento->motivo) — {{ $evento->motivo }} @endif

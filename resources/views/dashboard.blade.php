@@ -1,6 +1,8 @@
 @php
     use App\Models\Vehiculo;
 
+    app(\App\Servicios\Ventas::class)->vencerReservas(); // CA-05: el panel refleja el estado actual
+
     $porEstado = Vehiculo::query()
         ->selectRaw('estado, count(*) as total')
         ->groupBy('estado')
