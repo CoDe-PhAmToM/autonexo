@@ -17,6 +17,12 @@
                     @can('vehiculos.ver')
                         <flux:navlist.item icon="truck" :href="route('vehiculos.index')" :current="request()->routeIs('vehiculos.*')" wire:navigate>Vehículos</flux:navlist.item>
                     @endcan
+                    @can('ver-ventas')
+                        <flux:navlist.item icon="banknotes" :href="route('ventas.index')" :current="request()->routeIs('ventas.*')" wire:navigate>Ventas</flux:navlist.item>
+                    @endcan
+                    @can('repuestos.gestionar')
+                        <flux:navlist.item icon="wrench-screwdriver" :href="route('repuestos.index')" :current="request()->routeIs('repuestos.*')" wire:navigate>Repuestos</flux:navlist.item>
+                    @endcan
                 </flux:navlist.group>
 
                 @can('usuarios.gestionar')

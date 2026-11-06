@@ -35,6 +35,24 @@ Route::middleware(['auth'])->group(function () {
 
             return Storage::disk('local')->response($vehiculo->foto_path);
         })->name('vehiculos.foto');
+
+        // PBI-05 y PBI-06: reservar y vender
+        Route::middleware('can:ventas.registrar')->group(function () {
+            Volt::route('vehiculos/{vehiculo}/reservar', 'vehiculos.reservar')->name('vehiculos.reservar');
+            Volt::route('vehiculos/{vehiculo}/vender', 'ventas.crear')->name('ventas.crear');
+        });
+    });
+
+    // PBI-06: ventas (las ven quienes venden, cobran o revisan la cartera)
+    Route::middleware('can:ver-ventas')->group(function () {
+        Volt::route('ventas', 'ventas.index')->name('ventas.index');
+        Volt::route('ventas/{venta}', 'ventas.ver')->name('ventas.ver');
+    });
+
+    // PBI-11: kárdex de repuestos
+    Route::middleware('can:repuestos.gestionar')->group(function () {
+        Volt::route('repuestos', 'repuestos.index')->name('repuestos.index');
+        Volt::route('repuestos/{repuesto}', 'repuestos.ver')->name('repuestos.ver');
     });
 });
 
