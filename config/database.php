@@ -95,6 +95,10 @@ return [
             'prefix_indexes' => true,
             'search_path' => 'public',
             'sslmode' => 'prefer',
+            // PBI-21: carpeta de pg_dump para spatie/laravel-backup.
+            'dump' => [
+                'dump_binary_path' => env('DB_DUMP_PATH', ''),
+            ],
         ],
 
         'sqlsrv' => [
