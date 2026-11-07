@@ -90,12 +90,70 @@ test('la foto se guarda y solo se ve desde el negocio dueño', function () {
     Storage::fake('local');
     $vendedor = usuarioCon(Roles::VENDEDOR);
 
-    registrarVehiculo($vendedor, ['foto' => UploadedFile::fake()->image('auto.jpg')])->assertHasNoErrors();
+    registrarVehiculo($vendedor, ['fotos' => [UploadedFile::fake()->image('auto.jpg', 2400, 1600)]])->assertHasNoErrors();
     $vehiculo = Vehiculo::withoutGlobalScopes()->sole();
+    $foto = \App\Models\VehiculoFoto::withoutGlobalScopes()->sole();
 
-    Storage::disk('local')->assertExists($vehiculo->foto_path);
+    Storage::disk('local')->assertExists($foto->path);
+    // Se guarda reducida a 1600 px de lado.
+    expect(getimagesizefromstring(Storage::disk('local')->get($foto->path))[0])->toBe(1600);
+
     $this->actingAs($vendedor)->get(route('vehiculos.foto', $vehiculo))->assertOk();
+    $this->actingAs($vendedor)->get(route('vehiculos.fotos.ver', [$vehiculo, $foto]))->assertOk();
     $this->actingAs(usuarioCon(Roles::DUENO))->get(route('vehiculos.foto', $vehiculo))->assertNotFound();
+    $this->actingAs(usuarioCon(Roles::DUENO))->get(route('vehiculos.fotos.ver', [$vehiculo, $foto]))->assertNotFound();
+});
+
+test('un vehículo tiene una galería de varias fotos y se pueden quitar', function () {
+    Storage::fake('local');
+    $vendedor = usuarioCon(Roles::VENDEDOR);
+    $this->actingAs($vendedor);
+    $vehiculo = Vehiculo::factory()->for($vendedor->negocio)->create();
+
+    Volt::test('vehiculos.formulario', ['vehiculo' => $vehiculo])
+        ->set('fotos', [UploadedFile::fake()->image('frente.jpg'), UploadedFile::fake()->image('costado.jpg'), UploadedFile::fake()->image('interior.jpg')])
+        ->call('guardar')
+        ->assertHasNoErrors();
+
+    expect($vehiculo->fotos()->count())->toBe(3)
+        ->and($vehiculo->bitacora()->where('accion', 'actualizado')->first()->cambios)->toBe(['fotos' => ['antes' => 0, 'despues' => 3]]);
+
+    $this->get(route('vehiculos.ver', $vehiculo))->assertOk()->assertSee('3 foto(s)');
+
+    $quitada = $vehiculo->fotos()->first();
+    Volt::test('vehiculos.formulario', ['vehiculo' => $vehiculo->fresh()])->call('quitarFoto', $quitada->id);
+
+    expect($vehiculo->fotos()->count())->toBe(2);
+    Storage::disk('local')->assertMissing($quitada->path);
+});
+
+test('no se pasan de 8 fotos por vehículo', function () {
+    Storage::fake('local');
+    $vendedor = usuarioCon(Roles::VENDEDOR);
+    $this->actingAs($vendedor);
+    $vehiculo = Vehiculo::factory()->for($vendedor->negocio)->create();
+
+    $nueve = array_map(fn ($i) => UploadedFile::fake()->image("f{$i}.jpg"), range(1, 9));
+    Volt::test('vehiculos.formulario', ['vehiculo' => $vehiculo])->set('fotos', $nueve)->call('guardar')->assertHasErrors('fotos');
+
+    expect($vehiculo->fotos()->count())->toBe(0);
+});
+
+test('la vitrina muestra los autos con su foto o una silueta, y se puede cambiar a tabla', function () {
+    Storage::fake('local');
+    $vendedor = usuarioCon(Roles::VENDEDOR);
+    $this->actingAs($vendedor);
+    $conFoto = Vehiculo::factory()->for($vendedor->negocio)->create(['marca' => 'Toyota', 'modelo' => 'Corolla']);
+    $conFoto->agregarFotos([UploadedFile::fake()->image('a.jpg')]);
+    Vehiculo::factory()->for($vendedor->negocio)->create(['marca' => 'Suzuki', 'modelo' => 'Swift']);
+
+    $this->get(route('vehiculos.index'))
+        ->assertOk()
+        ->assertSee(route('vehiculos.foto', $conFoto), false)
+        ->assertSee('Vehículo sin foto')
+        ->assertSee('Toyota Corolla');
+
+    Volt::test('vehiculos.index')->set('vista', 'tabla')->assertSee('Chasis')->assertSee('Swift');
 });
 
 test('un usuario de otro negocio no ve vehículos ajenos', function () {

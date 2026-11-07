@@ -4,12 +4,16 @@ use App\Models\Repuesto;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Title;
 use Livewire\Volt\Component;
+use Livewire\WithFileUploads;
 
 /**
  * PBI-11 (CA-11): registrar entradas y salidas de un repuesto y ver su kárdex.
  */
 new #[Title('Kárdex')] class extends Component {
+    use WithFileUploads;
+
     public Repuesto $repuesto;
+    public $foto = null;
 
     public string $tipo = 'salida';
     public string $cantidad = '1';
@@ -30,6 +34,20 @@ new #[Title('Kárdex')] class extends Component {
         $this->dispatch('movimiento-registrado');
     }
 
+    /** Se guarda apenas se elige la foto. */
+    public function updatedFoto(): void
+    {
+        $this->validate(['foto' => ['image', 'max:4096']], ['foto.image' => 'El archivo debe ser una imagen.'], ['foto' => 'foto']);
+
+        $anterior = $this->repuesto->foto_path;
+        $this->repuesto->update(['foto_path' => \App\Support\Imagenes::guardar($this->foto, 'repuestos/'.$this->repuesto->negocio_id, 1000)]);
+        if ($anterior) {
+            \Illuminate\Support\Facades\Storage::disk('local')->delete($anterior);
+        }
+        $this->reset('foto');
+        $this->dispatch('foto-guardada');
+    }
+
     public function with(): array
     {
         return ['movimientos' => $this->repuesto->movimientos()->with('user')->limit(100)->get()];
@@ -45,7 +63,21 @@ new #[Title('Kárdex')] class extends Component {
         <flux:button :href="route('repuestos.index')" wire:navigate variant="ghost" icon="arrow-left">Volver</flux:button>
     </div>
 
-    <div class="grid gap-4 sm:grid-cols-3">
+    <div class="grid gap-4 sm:grid-cols-4">
+        <flux:card class="flex flex-col gap-2 p-2">
+            <div class="aspect-square overflow-hidden rounded-xl">
+                @if ($repuesto->foto_path)
+                    <img src="{{ route('repuestos.foto', $repuesto) }}?v={{ $repuesto->updated_at?->timestamp }}" alt="Foto de {{ $repuesto->nombre }}" class="size-full object-cover">
+                @else
+                    <x-silueta-repuesto class="size-full" />
+                @endif
+            </div>
+            <label class="cursor-pointer text-center text-xs text-faro hover:underline">
+                {{ $repuesto->foto_path ? 'Cambiar foto' : 'Agregar foto' }}
+                <input type="file" accept="image/*" wire:model="foto" class="sr-only">
+            </label>
+            <flux:error name="foto" />
+        </flux:card>
         <flux:card>
             <div class="text-sm text-zinc-500">Stock actual</div>
             <div class="mt-1 font-mono text-3xl tabular-nums {{ $repuesto->bajoMinimo() ? 'text-mora' : '' }}" data-contar="{{ $repuesto->stock }}" data-decimales="0">{{ $repuesto->stock }}</div>

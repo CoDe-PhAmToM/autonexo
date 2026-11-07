@@ -32,7 +32,7 @@ class Vehiculo extends Model
 
     protected $fillable = [
         'negocio_id', 'chasis', 'placa', 'marca', 'modelo', 'anio', 'color',
-        'costo_usd', 'precio_usd', 'estado', 'foto_path', 'observaciones',
+        'costo_usd', 'precio_usd', 'estado', 'observaciones',
     ];
 
     protected function casts(): array
@@ -60,6 +60,58 @@ class Vehiculo extends Model
     public static function normalizarChasis(?string $valor): string
     {
         return mb_strtoupper(preg_replace('/[\s\-]+/', '', (string) $valor));
+    }
+
+    /** Máximo de fotos en la galería de un vehículo. */
+    public const MAX_FOTOS = 8;
+
+    public function fotos(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(VehiculoFoto::class)->orderBy('orden')->orderBy('id');
+    }
+
+    /** La primera foto de la galería, o null. */
+    public function portada(): ?VehiculoFoto
+    {
+        return $this->relationLoaded('fotos') ? $this->fotos->first() : $this->fotos()->first();
+    }
+
+    /**
+     * Agrega fotos a la galería (reducidas a 1600 px) y lo anota en el historial.
+     *
+     * @param  array<int, \Illuminate\Http\UploadedFile>  $archivos
+     */
+    public function agregarFotos(array $archivos): void
+    {
+        if ($archivos === []) {
+            return;
+        }
+
+        $antes = $this->fotos()->count();
+        $orden = (int) $this->fotos()->max('orden');
+
+        foreach ($archivos as $archivo) {
+            $this->fotos()->create([
+                'negocio_id' => $this->negocio_id,
+                'path' => \App\Support\Imagenes::guardar($archivo, 'vehiculos/'.$this->negocio_id),
+                'orden' => ++$orden,
+            ]);
+        }
+
+        $this->unsetRelation('fotos');
+        $this->anotarEnBitacora('actualizado', ['fotos' => ['antes' => $antes, 'despues' => $antes + count($archivos)]]);
+    }
+
+    public function quitarFoto(VehiculoFoto $foto): void
+    {
+        abort_unless($foto->vehiculo_id === $this->id, 404);
+
+        $antes = $this->fotos()->count();
+        \Illuminate\Support\Facades\Storage::disk('local')->delete($foto->path);
+        $foto->delete();
+
+        $this->unsetRelation('fotos');
+        $this->anotarEnBitacora('actualizado', ['fotos' => ['antes' => $antes, 'despues' => $antes - 1]]);
     }
 
     public function reservas(): \Illuminate\Database\Eloquent\Relations\HasMany

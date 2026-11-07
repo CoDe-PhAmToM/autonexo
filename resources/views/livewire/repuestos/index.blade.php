@@ -6,13 +6,14 @@ use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
 use Livewire\Volt\Component;
+use Livewire\WithFileUploads;
 use Livewire\WithPagination;
 
 /**
  * PBI-11 (CA-11): repuestos con su stock; los que están bajo el mínimo se marcan.
  */
 new #[Title('Repuestos')] class extends Component {
-    use WithPagination;
+    use WithFileUploads, WithPagination;
 
     public string $buscar = '';
     public bool $soloBajoMinimo = false;
@@ -23,6 +24,7 @@ new #[Title('Repuestos')] class extends Component {
     public string $stock_minimo = '0';
     public string $precio_bs = '';
     public string $stock_inicial = '0';
+    public $foto = null;
 
     public function updatedBuscar(): void { $this->resetPage(); }
     public function updatedSoloBajoMinimo(): void { $this->resetPage(); }
@@ -56,6 +58,7 @@ new #[Title('Repuestos')] class extends Component {
             'stock_minimo' => ['required', 'integer', 'min:0'],
             'precio_bs' => ['nullable', 'regex:/^\d{1,12}(\.\d{1,2})?$/'],
             'stock_inicial' => ['required', 'integer', 'min:0'],
+            'foto' => ['nullable', 'image', 'max:4096'],
         ], ['codigo.unique' => 'Ya existe un repuesto con este código.'], ['codigo' => 'código', 'stock_minimo' => 'stock mínimo', 'precio_bs' => 'precio']);
 
         $repuesto = Repuesto::create([
@@ -64,13 +67,14 @@ new #[Title('Repuestos')] class extends Component {
             'unidad' => $datos['unidad'],
             'stock_minimo' => (int) $datos['stock_minimo'],
             'precio_bs' => $datos['precio_bs'] ?: null,
+            'foto_path' => $this->foto ? \App\Support\Imagenes::guardar($this->foto, 'repuestos/'.auth()->user()->negocio_id, 1000) : null,
         ]);
 
         if ((int) $datos['stock_inicial'] > 0) {
             $repuesto->mover('entrada', (int) $datos['stock_inicial'], 'Stock inicial');
         }
 
-        $this->reset('codigo', 'nombre', 'precio_bs');
+        $this->reset('codigo', 'nombre', 'precio_bs', 'foto');
         $this->unidad = 'pieza';
         $this->stock_minimo = '0';
         $this->stock_inicial = '0';
@@ -102,6 +106,7 @@ new #[Title('Repuestos')] class extends Component {
                     <flux:input wire:model="stock_inicial" label="Stock inicial" type="number" min="0" />
                     <flux:input wire:model="stock_minimo" label="Stock mínimo" type="number" min="0" />
                 </div>
+                <flux:input wire:model="foto" type="file" accept="image/*" label="Foto (opcional)" />
                 <div class="flex items-center gap-3">
                     <flux:button type="submit" variant="primary">Crear repuesto</flux:button>
                     <x-action-message on="repuesto-creado">Creado.</x-action-message>
@@ -122,6 +127,7 @@ new #[Title('Repuestos')] class extends Component {
             @else
                 <flux:table :paginate="$this->repuestos">
                     <flux:table.columns>
+                        <flux:table.column class="w-14"></flux:table.column>
                         <flux:table.column>Código</flux:table.column>
                         <flux:table.column>Repuesto</flux:table.column>
                         <flux:table.column align="end">Stock</flux:table.column>
@@ -131,6 +137,15 @@ new #[Title('Repuestos')] class extends Component {
                     <flux:table.rows>
                         @foreach ($this->repuestos as $repuesto)
                             <flux:table.row :key="$repuesto->id">
+                                <flux:table.cell>
+                                    <a href="{{ route('repuestos.ver', $repuesto) }}" wire:navigate class="block size-10 overflow-hidden rounded-lg border border-white/10">
+                                        @if ($repuesto->foto_path)
+                                            <img src="{{ route('repuestos.foto', $repuesto) }}" alt="" loading="lazy" class="size-full object-cover">
+                                        @else
+                                            <x-silueta-repuesto class="size-full" />
+                                        @endif
+                                    </a>
+                                </flux:table.cell>
                                 <flux:table.cell class="font-mono text-xs">{{ $repuesto->codigo }}</flux:table.cell>
                                 <flux:table.cell variant="strong">
                                     <a href="{{ route('repuestos.ver', $repuesto) }}" wire:navigate class="hover:underline">{{ $repuesto->nombre }}</a>

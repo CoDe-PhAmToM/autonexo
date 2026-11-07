@@ -3,6 +3,8 @@
 use App\Importacion\PlantillaCarga;
 use App\Models\Cobro;
 use App\Models\Vehiculo;
+use App\Models\VehiculoFoto;
+use App\Support\Imagenes;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
@@ -32,11 +34,12 @@ Route::middleware(['auth'])->group(function () {
         Volt::route('vehiculos/{vehiculo}', 'vehiculos.ver')->name('vehiculos.ver');
         Volt::route('vehiculos/{vehiculo}/editar', 'vehiculos.formulario')->middleware('can:vehiculos.gestionar')->name('vehiculos.editar');
 
-        Route::get('vehiculos/{vehiculo}/foto', function (Vehiculo $vehiculo) {
-            abort_unless($vehiculo->foto_path && Storage::disk('local')->exists($vehiculo->foto_path), 404);
-
-            return Storage::disk('local')->response($vehiculo->foto_path);
-        })->name('vehiculos.foto');
+        // Fotos privadas: solo las ve el negocio dueño del vehículo.
+        Route::get('vehiculos/{vehiculo}/foto', fn (Vehiculo $vehiculo) => Imagenes::responder($vehiculo->portada()?->path))
+            ->name('vehiculos.foto');
+        Route::get('vehiculos/{vehiculo}/fotos/{foto}', fn (Vehiculo $vehiculo, VehiculoFoto $foto) => Imagenes::responder($foto->path))
+            ->scopeBindings()
+            ->name('vehiculos.fotos.ver');
 
         // PBI-05 y PBI-06: reservar y vender
         Route::middleware('can:ventas.registrar')->group(function () {
@@ -102,6 +105,8 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware('can:repuestos.gestionar')->group(function () {
         Volt::route('repuestos', 'repuestos.index')->name('repuestos.index');
         Volt::route('repuestos/{repuesto}', 'repuestos.ver')->name('repuestos.ver');
+        Route::get('repuestos/{repuesto}/foto', fn (\App\Models\Repuesto $repuesto) => Imagenes::responder($repuesto->foto_path))
+            ->name('repuestos.foto');
     });
 });
 

@@ -18,7 +18,7 @@ class Repuesto extends Model
     /** @use HasFactory<\Database\Factories\RepuestoFactory> */
     use HasFactory, PerteneceANegocio;
 
-    protected $fillable = ['negocio_id', 'codigo', 'nombre', 'unidad', 'stock_minimo', 'precio_bs'];
+    protected $fillable = ['negocio_id', 'codigo', 'nombre', 'unidad', 'stock_minimo', 'precio_bs', 'foto_path'];
 
     protected function casts(): array
     {

@@ -22,6 +22,10 @@ new #[Title('Vehículos')] class extends Component {
     #[Url(except: '')]
     public string $estado = '';
 
+    /** vitrina (tarjetas con foto) | tabla */
+    #[Url(except: 'vitrina')]
+    public string $vista = 'vitrina';
+
     public function mount(Ventas $ventas): void
     {
         $ventas->vencerReservas();
@@ -37,6 +41,7 @@ new #[Title('Vehículos')] class extends Component {
         $chasis = Vehiculo::normalizarChasis($texto);
 
         return Vehiculo::query()
+            ->with('fotos')
             ->when($texto !== '', fn ($q) => $q->where(fn ($q) => $q
                 ->where('chasis', 'like', "%{$chasis}%")
                 ->orWhere('placa', 'like', '%'.mb_strtoupper(str_replace(' ', '', $texto)).'%')
@@ -44,7 +49,7 @@ new #[Title('Vehículos')] class extends Component {
                 ->orWhere('marca', 'ilike', "%{$texto}%")))
             ->when($this->estado !== '', fn ($q) => $q->where('estado', $this->estado))
             ->latest('id')
-            ->paginate(15);
+            ->paginate(12);
     }
 
     #[Computed]
@@ -60,9 +65,19 @@ new #[Title('Vehículos')] class extends Component {
             <flux:heading size="xl">Vehículos</flux:heading>
             <flux:subheading>Stock por estado. Busca por chasis, placa, marca o modelo.</flux:subheading>
         </div>
-        @can('vehiculos.gestionar')
-            <flux:button variant="primary" icon="plus" :href="route('vehiculos.crear')" wire:navigate>Nuevo vehículo</flux:button>
-        @endcan
+        <div class="flex flex-wrap items-center gap-2">
+            <div class="flex rounded-full border border-white/10 bg-noche/40 p-1" role="group" aria-label="Forma de ver">
+                <button type="button" wire:click="$set('vista', 'vitrina')" @class(['flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm transition', 'bg-white/10 text-cromo shadow-[inset_0_0_0_1px_rgba(32,227,242,.4)]' => $vista === 'vitrina', 'text-niebla hover:text-cromo' => $vista !== 'vitrina'])>
+                    <flux:icon name="squares-2x2" class="size-4" /> Vitrina
+                </button>
+                <button type="button" wire:click="$set('vista', 'tabla')" @class(['flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm transition', 'bg-white/10 text-cromo shadow-[inset_0_0_0_1px_rgba(32,227,242,.4)]' => $vista === 'tabla', 'text-niebla hover:text-cromo' => $vista !== 'tabla'])>
+                    <flux:icon name="table-cells" class="size-4" /> Tabla
+                </button>
+            </div>
+            @can('vehiculos.gestionar')
+                <flux:button variant="primary" icon="plus" :href="route('vehiculos.crear')" wire:navigate>Nuevo vehículo</flux:button>
+            @endcan
+        </div>
     </div>
 
     <div class="flex flex-wrap gap-2">
@@ -83,6 +98,38 @@ new #[Title('Vehículos')] class extends Component {
             <div class="py-10 text-center text-zinc-500">
                 {{ $buscar !== '' || $estado !== '' ? 'Ningún vehículo coincide con la búsqueda.' : 'Todavía no hay vehículos registrados.' }}
             </div>
+        @elseif ($vista === 'vitrina')
+            <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                @foreach ($this->vehiculos as $vehiculo)
+                    <a href="{{ route('vehiculos.ver', $vehiculo) }}" wire:navigate wire:key="v-{{ $vehiculo->id }}"
+                       class="vidrio entrar group flex flex-col overflow-hidden transition duration-300 hover:-translate-y-1 hover:border-faro/40 hover:shadow-[0_24px_50px_-20px_rgba(32,227,242,.45)]">
+                        <div class="relative aspect-[16/10] overflow-hidden">
+                            @if ($vehiculo->portada())
+                                <img src="{{ route('vehiculos.foto', $vehiculo) }}" alt="{{ $vehiculo->descripcion() }}" loading="lazy"
+                                     class="size-full object-cover transition duration-700 group-hover:scale-105">
+                            @else
+                                <x-silueta-auto class="size-full" :etiqueta="false" />
+                            @endif
+                            <span class="pointer-events-none absolute inset-0 bg-gradient-to-t from-noche/90 via-transparent to-transparent"></span>
+                            <span class="absolute left-3 top-3"><flux:badge size="sm" :color="$vehiculo->colorEstado()">{{ $vehiculo->nombreEstado() }}</flux:badge></span>
+                            @if ($vehiculo->fotos->count() > 1)
+                                <span class="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-noche/70 px-2 py-0.5 font-mono text-[11px] text-cromo">
+                                    <flux:icon name="photo" class="size-3.5" /> {{ $vehiculo->fotos->count() }}
+                                </span>
+                            @endif
+                            <span class="absolute bottom-2 left-3 font-mono text-lg text-cromo drop-shadow">{{ Formato::usd($vehiculo->precio_usd) }}</span>
+                        </div>
+                        <div class="flex items-center justify-between gap-2 p-4">
+                            <div class="min-w-0">
+                                <div class="truncate font-medium text-cromo group-hover:text-faro">{{ $vehiculo->marca }} {{ $vehiculo->modelo }}</div>
+                                <div class="truncate font-mono text-xs text-niebla">{{ $vehiculo->anio }} · {{ $vehiculo->placa ?? 'sin placa' }} · {{ $vehiculo->color ?? '—' }}</div>
+                            </div>
+                            <flux:icon name="arrow-up-right" class="size-5 shrink-0 text-niebla transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-faro" />
+                        </div>
+                    </a>
+                @endforeach
+            </div>
+            <flux:pagination :paginator="$this->vehiculos" />
         @else
             <flux:table :paginate="$this->vehiculos">
                 <flux:table.columns>

@@ -14,7 +14,7 @@ new #[Title('Vehículo')] class extends Component {
     public const CAMPOS = [
         'chasis' => 'Chasis', 'placa' => 'Placa', 'marca' => 'Marca', 'modelo' => 'Modelo',
         'anio' => 'Año', 'color' => 'Color', 'costo_usd' => 'Costo USD', 'precio_usd' => 'Precio USD',
-        'estado' => 'Estado', 'foto_path' => 'Foto', 'observaciones' => 'Observaciones',
+        'estado' => 'Estado', 'fotos' => 'Fotos', 'observaciones' => 'Observaciones',
     ];
 
     public function cancelarReserva(\App\Servicios\Ventas $ventas): void
@@ -84,7 +84,7 @@ new #[Title('Vehículo')] class extends Component {
         </flux:callout>
     @endif
 
-    <div class="grid gap-6 lg:grid-cols-3">
+    <div class="grid gap-6 lg:grid-cols-5">
         <flux:card class="lg:col-span-2">
             <dl class="grid grid-cols-2 gap-x-6 gap-y-4 text-sm sm:grid-cols-3">
                 <div><dt class="text-zinc-500">Estado</dt><dd><flux:badge size="sm" :color="$vehiculo->colorEstado()">{{ $vehiculo->nombreEstado() }}</flux:badge></dd></div>
@@ -101,11 +101,31 @@ new #[Title('Vehículo')] class extends Component {
             </dl>
         </flux:card>
 
-        <flux:card class="flex items-center justify-center p-2">
-            @if ($vehiculo->foto_path)
-                <img src="{{ route('vehiculos.foto', $vehiculo) }}" alt="Foto de {{ $vehiculo->descripcion() }}" class="max-h-64 rounded-lg object-contain">
+        @php $galeria = $vehiculo->fotos; @endphp
+        <flux:card class="overflow-hidden p-2 lg:order-first lg:col-span-3">
+            @if ($galeria->isNotEmpty())
+                <div x-data="{ actual: '{{ route('vehiculos.fotos.ver', [$vehiculo, $galeria->first()]) }}' }" class="flex flex-col gap-2">
+                    <div class="relative aspect-[16/10] overflow-hidden rounded-xl bg-noche">
+                        <img :src="actual" src="{{ route('vehiculos.fotos.ver', [$vehiculo, $galeria->first()]) }}"
+                             alt="Foto de {{ $vehiculo->descripcion() }}" class="size-full object-cover transition duration-500">
+                        <span class="absolute bottom-2 right-3 rounded-full bg-noche/70 px-2 py-0.5 font-mono text-[11px] text-cromo">{{ $galeria->count() }} foto(s)</span>
+                    </div>
+                    @if ($galeria->count() > 1)
+                        <div class="grid grid-cols-4 gap-2 sm:grid-cols-6">
+                            @foreach ($galeria as $foto)
+                                @php $url = route('vehiculos.fotos.ver', [$vehiculo, $foto]); @endphp
+                                <button type="button" x-on:click="actual = '{{ $url }}'"
+                                        class="aspect-[4/3] overflow-hidden rounded-lg border transition"
+                                        :class="actual === '{{ $url }}' ? 'border-faro shadow-[0_0_14px_-4px_#20E3F2]' : 'border-white/10 opacity-70 hover:opacity-100'"
+                                        aria-label="Ver foto {{ $loop->iteration }}">
+                                    <img src="{{ $url }}" alt="" class="size-full object-cover" loading="lazy">
+                                </button>
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
             @else
-                <div class="py-10 text-sm text-zinc-500">Sin foto</div>
+                <x-silueta-auto class="aspect-[16/10] rounded-xl" />
             @endif
         </flux:card>
     </div>
