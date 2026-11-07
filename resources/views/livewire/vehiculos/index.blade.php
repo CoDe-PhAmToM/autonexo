@@ -87,7 +87,7 @@ new #[Title('Vehículos')] class extends Component {
             <flux:table :paginate="$this->vehiculos">
                 <flux:table.columns>
                     <flux:table.column>Vehículo</flux:table.column>
-                    <flux:table.column>Chasis</flux:table.column>
+                    <flux:table.column class="max-sm:hidden">Chasis</flux:table.column>
                     <flux:table.column>Placa</flux:table.column>
                     <flux:table.column align="end">Precio</flux:table.column>
                     <flux:table.column>Estado</flux:table.column>
@@ -98,7 +98,7 @@ new #[Title('Vehículos')] class extends Component {
                             <flux:table.cell variant="strong">
                                 <a href="{{ route('vehiculos.ver', $vehiculo) }}" wire:navigate class="hover:underline">{{ $vehiculo->descripcion() }}</a>
                             </flux:table.cell>
-                            <flux:table.cell class="font-mono text-xs">{{ $vehiculo->chasis }}</flux:table.cell>
+                            <flux:table.cell class="font-mono text-xs max-sm:hidden">{{ $vehiculo->chasis }}</flux:table.cell>
                             <flux:table.cell>{{ $vehiculo->placa ?? '—' }}</flux:table.cell>
                             <flux:table.cell align="end">{{ Formato::usd($vehiculo->precio_usd) }}</flux:table.cell>
                             <flux:table.cell>

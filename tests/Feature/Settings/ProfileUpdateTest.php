@@ -54,36 +54,12 @@ class ProfileUpdateTest extends TestCase
         $this->assertNotNull($user->refresh()->email_verified_at);
     }
 
-    public function test_user_can_delete_their_account(): void
+    public function test_profile_does_not_offer_account_deletion(): void
     {
-        $user = User::factory()->create();
+        // AutoNexo: los usuarios los administra el dueño; nadie elimina su propia cuenta
+        // (los cobros y cierres de caja quedan a su nombre).
+        $this->actingAs(User::factory()->create());
 
-        $this->actingAs($user);
-
-        $response = Volt::test('settings.delete-user-form')
-            ->set('password', 'password')
-            ->call('deleteUser');
-
-        $response
-            ->assertHasNoErrors()
-            ->assertRedirect('/');
-
-        $this->assertNull($user->fresh());
-        $this->assertFalse(auth()->check());
-    }
-
-    public function test_correct_password_must_be_provided_to_delete_account(): void
-    {
-        $user = User::factory()->create();
-
-        $this->actingAs($user);
-
-        $response = Volt::test('settings.delete-user-form')
-            ->set('password', 'wrong-password')
-            ->call('deleteUser');
-
-        $response->assertHasErrors(['password']);
-
-        $this->assertNotNull($user->fresh());
+        $this->get('/settings/profile')->assertOk()->assertDontSee('Eliminar cuenta');
     }
 }

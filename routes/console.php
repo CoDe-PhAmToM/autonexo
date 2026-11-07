@@ -12,6 +12,35 @@ Schedule::command('backup:run --disable-notifications')->dailyAt('23:30');
 Schedule::command('backup:clean --disable-notifications')->dailyAt('23:45');
 
 /*
+ * Deja la base con los datos de demostración, lista para presentar.
+ * BORRA todos los datos actuales, por eso pide confirmación.
+ *
+ *   php artisan autonexo:demo
+ */
+Artisan::command('autonexo:demo {--force : No pide confirmación}', function () {
+    $this->warn('Esto BORRA todos los datos de la base «'.config('database.connections.pgsql.database').'» y carga los de demostración.');
+
+    if (! $this->option('force') && ! $this->confirm('¿Continuar?')) {
+        $this->info('Cancelado; no se borró nada.');
+
+        return 0;
+    }
+
+    $this->call('migrate:fresh', ['--seed' => true, '--force' => true]);
+
+    $this->newLine();
+    $this->info('Demo lista. Entra en http://localhost:8000 con cualquiera de estos usuarios (contraseña: password):');
+    $this->table(['Rol', 'Correo'], [
+        ['Dueño', 'dueno@autonexo.test'],
+        ['Cajero', 'cajero@autonexo.test'],
+        ['Vendedor', 'vendedor@autonexo.test'],
+        ['Almacenero', 'almacen@autonexo.test'],
+    ]);
+
+    return 0;
+})->purpose('Reinicia la base con los datos de demostración (borra todo)');
+
+/*
  * PBI-21 (CA-21): prueba la restauración del último respaldo en una base limpia
  * y compara conteos y saldos con la base actual.
  *
