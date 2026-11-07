@@ -13,6 +13,12 @@
         ? \App\Models\Transferencia::with('pasos', 'venta.vehiculo', 'venta.comprador')
             ->where('estado', 'en_curso')->get()->filter->alertaImt()
         : collect();
+
+    // PBI-22 (pivote HP-03): recordatorio de cerrar la caja si hubo cobros hoy.
+    $cobrosSinCerrar = auth()->user()->can('caja.cerrar')
+        && ! \App\Models\CierreCaja::where('user_id', auth()->id())->whereDate('fecha', today())->exists()
+        ? \App\Models\Cobro::where('user_id', auth()->id())->whereDate('created_at', today())->whereNull('anulado_at')->whereIn('medio', ['efectivo', 'qr'])->count()
+        : 0;
 @endphp
 
 <x-layouts.app title="Panel">
@@ -31,6 +37,16 @@
                 </flux:card>
             @endforeach
         </div>
+
+        @if ($cobrosSinCerrar > 0)
+            <flux:callout icon="lock-open" color="amber">
+                <flux:callout.heading>Todavía no cerraste la caja de hoy</flux:callout.heading>
+                <flux:callout.text>
+                    Registraste {{ $cobrosSinCerrar }} cobro(s). Al terminar el día, cuenta el efectivo y los QR y
+                    <a class="underline" href="{{ route('caja.index') }}" wire:navigate>cierra la caja</a>.
+                </flux:callout.text>
+            </flux:callout>
+        @endif
 
         @foreach ($alertasImt as $t)
             <flux:callout variant="danger" icon="exclamation-triangle">
