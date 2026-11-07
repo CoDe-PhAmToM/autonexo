@@ -92,6 +92,24 @@ final class Cartera
         SQL, ['hoy' => today()->toDateString(), 'negocio' => $negocioId]));
     }
 
+    /**
+     * PBI-09 (CA-09): cuotas impagas desde el día siguiente a su vencimiento, la más antigua primero.
+     * Una cuota pagada no aparece.
+     *
+     * @return array{total:int, cuotas: Collection<int, \App\Models\Cuota>}
+     */
+    public function cuotasVencidas(int $limite = 8): array
+    {
+        $consulta = \App\Models\Cuota::query()
+            ->whereDate('vencimiento', '<', today())
+            ->whereColumn('pagado', '<', 'monto');
+
+        return [
+            'total' => (clone $consulta)->count(),
+            'cuotas' => $consulta->with('venta.comprador', 'venta.vehiculo')->orderBy('vencimiento')->limit($limite)->get(),
+        ];
+    }
+
     /** CA-08: los QR por confirmar se muestran aparte (no forman parte de lo cobrado). */
     public function qrPorConfirmar(): Collection
     {
