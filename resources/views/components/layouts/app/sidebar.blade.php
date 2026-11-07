@@ -23,6 +23,12 @@
                     @can('cobros.registrar')
                         <flux:navlist.item icon="currency-dollar" :href="route('cobros.index')" :current="request()->routeIs('cobros.*')" wire:navigate>Cobros</flux:navlist.item>
                     @endcan
+                    @can('cartera.ver')
+                        <flux:navlist.item icon="chart-bar" :href="route('cartera.index')" :current="request()->routeIs('cartera.*')" wire:navigate>Cartera</flux:navlist.item>
+                    @endcan
+                    @can('caja.cerrar')
+                        <flux:navlist.item icon="lock-closed" :href="route('caja.index')" :current="request()->routeIs('caja.*')" wire:navigate>Cierre de caja</flux:navlist.item>
+                    @endcan
                     @can('transferencias.gestionar')
                         <flux:navlist.item icon="clipboard-document-check" :href="route('transferencias.index')" :current="request()->routeIs('transferencias.*')" wire:navigate>Transferencias</flux:navlist.item>
                     @endcan
@@ -34,6 +40,9 @@
                 @can('usuarios.gestionar')
                     <flux:navlist.group heading="Administración" class="grid">
                         <flux:navlist.item icon="users" :href="route('usuarios.index')" :current="request()->routeIs('usuarios.*')" wire:navigate>Usuarios</flux:navlist.item>
+                        @can('respaldos.gestionar')
+                            <flux:navlist.item icon="circle-stack" :href="route('respaldos.index')" :current="request()->routeIs('respaldos.*')" wire:navigate>Respaldos</flux:navlist.item>
+                        @endcan
                         @can('datos.importar')
                             <flux:navlist.item icon="arrow-up-tray" :href="route('carga.index')" :current="request()->routeIs('carga.*')" wire:navigate>Carga inicial</flux:navlist.item>
                         @endcan

@@ -75,6 +75,21 @@ Route::middleware(['auth'])->group(function () {
         Route::get('carga-inicial/plantilla', fn () => Excel::download(new PlantillaCarga, 'plantilla_autonexo.xlsx'))->name('carga.plantilla');
     });
 
+    // PBI-08: cartera y mora
+    Volt::route('cartera', 'cartera.index')->middleware('can:cartera.ver')->name('cartera.index');
+
+    // PBI-22: cierre de caja
+    Volt::route('caja', 'caja.index')->middleware('can:caja.cerrar')->name('caja.index');
+
+    // PBI-21: respaldos y exportación (solo el dueño)
+    Route::middleware('can:respaldos.gestionar')->group(function () {
+        Volt::route('respaldos', 'respaldos.index')->name('respaldos.index');
+        Route::get('respaldos/exportar', fn () => Excel::download(
+            new \App\Importacion\RegistrosDelNegocio,
+            'autonexo_registros_'.now()->format('Y-m-d').'.xlsx',
+        ))->name('respaldos.exportar');
+    });
+
     // PBI-11: kárdex de repuestos
     Route::middleware('can:repuestos.gestionar')->group(function () {
         Volt::route('repuestos', 'repuestos.index')->name('repuestos.index');
