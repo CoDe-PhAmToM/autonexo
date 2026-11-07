@@ -152,3 +152,10 @@ Antes: `php artisan autonexo:demo` y `composer run dev`.
 6. **Cartera** por tramos y compradores en mora (PBI-08); **Cierre de caja** con una diferencia y su observación (PBI-22).
 7. **Transferencias**: marcar el pago del IMT y los demás pasos hasta que el vehículo quede «Entregado» (PBI-10).
 8. **Medición de uso** (PBI-23), **Respaldos** (PBI-21) y el tablero Kanban en GitHub Projects.
+
+## Créditos de las fotos
+
+Fotos del showroom del login, de uso gratuito bajo la [Licencia Unsplash](https://unsplash.com/license):
+
+- Auto entre líneas de luz y auto azul con luces horizontales: [Hyundai Motor Group](https://unsplash.com/@hyundaimotorgroup).
+- SUV azul bajo un foco de estudio: [ObjectType RAW](https://unsplash.com/@objecttyperaw).

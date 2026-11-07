@@ -3,12 +3,18 @@
     <head>
         @include('partials.head')
         <style>
-            .showroom { position: relative; height: 230px; border-radius: 1.5rem; overflow: hidden; }
-            .showroom .foco { position: absolute; top: -10%; width: 34%; height: 120%; background: linear-gradient(180deg, rgba(238,242,248,.22), transparent 75%); clip-path: polygon(42% 0, 58% 0, 100% 100%, 0 100%); filter: blur(6px); animation: foco 5s ease-in-out infinite alternate; }
-            .showroom .f1 { left: 4%; } .showroom .f2 { left: 33%; animation-delay: -1.6s; } .showroom .f3 { left: 62%; animation-delay: -3.2s; }
-            .showroom .piso { position: absolute; left: 8%; right: 8%; bottom: 14%; height: 34px; border-radius: 50%; background: radial-gradient(ellipse, rgba(32,227,242,.38), rgba(47,107,255,.14) 45%, transparent 72%); filter: blur(8px); }
-            .showroom .marca { position: absolute; inset: 0; display: grid; place-items: center; }
-            @keyframes foco { from { opacity: .45; } to { opacity: 1; } }
+            /* Showroom: carrusel lento de fotos (Unsplash), cada una 6 s, con fundido y acercamiento. */
+            .showroom { position: relative; aspect-ratio: 16 / 9; max-height: 340px; width: 100%; border-radius: 1.5rem; overflow: hidden; background: #05060B; }
+            .showroom .diapo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; animation: diapo 18s infinite; }
+            .showroom .diapo:nth-of-type(1) { opacity: 1; object-position: 50% 46%; animation-delay: 0s; }
+            .showroom .diapo:nth-of-type(2) { object-position: 50% 55%; animation-delay: 6s; }
+            .showroom .diapo:nth-of-type(3) { object-position: 50% 60%; animation-delay: 12s; }
+            .showroom .sombra { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(5,6,11,.15), transparent 35%, transparent 55%, rgba(5,6,11,.85)), radial-gradient(120% 90% at 50% 40%, transparent 55%, rgba(5,6,11,.6)); }
+            .showroom .piso { position: absolute; left: 12%; right: 12%; bottom: 6%; height: 40px; border-radius: 50%; background: radial-gradient(ellipse, rgba(32,227,242,.45), rgba(47,107,255,.18) 45%, transparent 72%); filter: blur(10px); mix-blend-mode: screen; animation: brillo 4s ease-in-out infinite alternate; }
+            .showroom .chip { position: absolute; left: 16px; top: 14px; }
+            .showroom .credito { position: absolute; right: 14px; bottom: 10px; font-size: 10px; letter-spacing: .04em; color: rgba(238,242,248,.55); }
+            @keyframes diapo { 0% { opacity: 0; transform: scale(1.08); } 6% { opacity: 1; } 33% { opacity: 1; } 40% { opacity: 0; transform: scale(1); } 100% { opacity: 0; transform: scale(1); } }
+            @keyframes brillo { from { opacity: .55; } to { opacity: 1; } }
         </style>
     </head>
     <body class="min-h-screen bg-noche font-sans text-cromo antialiased">
@@ -33,11 +39,7 @@
                     Inventario por chasis, ventas a crédito, cobros en bolivianos o dólares y el seguimiento del trámite, en un solo lugar.
                 </p>
 
-                <div class="vidrio entrar showroom" style="--i: 1">
-                    <span class="foco f1"></span><span class="foco f2"></span><span class="foco f3"></span>
-                    <span class="piso"></span>
-                    <div class="marca"><x-app-logo-icon class="size-20 opacity-90" /></div>
-                </div>
+                <x-showroom style="--i: 1" />
 
                 <div class="grid grid-cols-3 gap-3">
                     <div class="vidrio entrar px-4 py-3" style="--i: 2">
@@ -61,6 +63,8 @@
                     <x-app-logo-icon :animado="true" class="size-16" />
                     <span class="font-display text-xl tracking-[.12em]">AUTO<span class="texto-vivo">NEXO</span></span>
                 </a>
+
+                <x-showroom class="lg:hidden" style="--i: 0" />
 
                 <div class="vidrio entrar flex flex-col gap-6 p-6 sm:p-8">
                     {{ $slot }}
