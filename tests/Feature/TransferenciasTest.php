@@ -95,6 +95,14 @@ test('no se inicia la transferencia dos veces ni de un vehículo no vendido', fu
         ->toThrow(\Illuminate\Validation\ValidationException::class);
 });
 
+test('el límite del IMT salta los feriados de Bolivia', function () {
+    $this->travelTo(CarbonImmutable::parse('2026-07-31 10:00'));
+    $venta = ventaDelEntregable();
+
+    $t = app(Transferencias::class)->iniciar($venta, '2026-07-31');
+    expect($t->fecha_limite_imt->toDateString())->toBe('2026-08-17'); // salta el 6 de agosto
+});
+
 test('el plazo del IMT es configurable por negocio', function () {
     $this->dueno->negocio->update(['plazo_imt_dias' => 5]);
 

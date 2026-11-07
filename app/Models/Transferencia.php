@@ -58,13 +58,15 @@ class Transferencia extends Model
         return $this->estado === 'concluida';
     }
 
-    /** Días hábiles (lunes a viernes) que faltan para el límite del IMT; negativo si ya venció. */
+    /** Días hábiles (sin fines de semana ni feriados) que faltan para el límite del IMT; negativo si ya venció. */
     public function diasHabilesParaImt(): int
     {
         $hoy = CarbonImmutable::today();
         $limite = CarbonImmutable::parse($this->fecha_limite_imt);
 
-        return $hoy->lte($limite) ? $hoy->diffInWeekdays($limite) : -$limite->diffInWeekdays($hoy);
+        return $hoy->lte($limite)
+            ? \App\Support\Feriados::diasHabilesEntre($hoy, $limite)
+            : -\App\Support\Feriados::diasHabilesEntre($limite, $hoy);
     }
 
     /** "IMT vencido", "falta 1 día hábil", "faltan 3 días hábiles". */

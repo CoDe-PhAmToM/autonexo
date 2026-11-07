@@ -103,6 +103,37 @@ test('CA-12: con consentimiento se genera el comprobante ligado al cobro y el es
         ->and(rawurldecode($wa))->toContain('no sustituye a una factura');
 });
 
+test('el comprador descarga el PDF con el enlace firmado, sin iniciar sesión', function () {
+    $venta = ventaDelEntregable(['comprador' => ['ci' => '6045123', 'nombre' => 'Juan Carlos Mamani', 'telefono' => '71234567']]);
+    $venta->comprador->registrarConsentimiento(true);
+    $cobro = app(Cobros::class)->registrar($venta, ['medio' => 'efectivo', 'moneda_pago' => 'USD', 'monto' => '500']);
+    $otro = app(Cobros::class)->registrar($venta, ['medio' => 'efectivo', 'moneda_pago' => 'USD', 'monto' => '500']);
+
+    $enlace = app(Comprobantes::class)->enlacePublico($cobro);
+    expect(rawurldecode(app(Comprobantes::class)->enlaceWhatsApp($cobro->fresh())))->toContain('/comprobante/'.$cobro->id.'?');
+
+    auth()->logout();
+    $this->get($enlace)->assertOk()->assertHeader('content-type', 'application/pdf');
+
+    // Alterado para ver otro cobro: rechazado.
+    $this->get(str_replace('/comprobante/'.$cobro->id.'?', '/comprobante/'.$otro->id.'?', $enlace))->assertForbidden();
+
+    // Vencido (más de 7 días): rechazado.
+    $this->travel(8)->days();
+    $this->get($enlace)->assertForbidden();
+});
+
+test('el enlace firmado tampoco sirve si el comprador retiró su consentimiento', function () {
+    $venta = ventaDelEntregable();
+    $venta->comprador->registrarConsentimiento(true);
+    $cobro = app(Cobros::class)->registrar($venta, ['medio' => 'efectivo', 'moneda_pago' => 'USD', 'monto' => '500']);
+    $enlace = app(Comprobantes::class)->enlacePublico($cobro);
+    $venta->comprador->registrarConsentimiento(false);
+
+    auth()->logout();
+    $this->get($enlace)->assertForbidden();
+});
+
 test('el comprobante de un cobro anulado lo indica', function () {
     $venta = ventaDelEntregable();
     $venta->comprador->registrarConsentimiento(true);

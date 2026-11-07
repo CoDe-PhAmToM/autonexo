@@ -17,7 +17,7 @@ Construye los **17 PBI del MVP** del Entregable Parcial I, en el orden del **bac
 | Pantallas | Livewire 3 (Volt) + Flux + Tailwind CSS 4 |
 | Base de datos | PostgreSQL |
 | Librerías | spatie/laravel-permission (roles), maatwebsite/excel (carga y exportación), barryvdh/laravel-dompdf (PDF), spatie/laravel-backup (respaldo) |
-| Pruebas | Pest 4: **448 pruebas** |
+| Pruebas | Pest 4: **454 pruebas** |
 
 ## Instalación (Windows)
 
@@ -44,7 +44,7 @@ php artisan autonexo:demo
 composer run dev
 ```
 
-Entra en <http://localhost:8000>.
+Entra en <http://localhost:8000>. `composer run dev` también deja corriendo el respaldo automático de cada noche.
 
 ### Usuarios de demostración
 
@@ -57,15 +57,44 @@ La contraseña de todos es `password` (solo para la demo local).
 | Vendedor | `vendedor@autonexo.test` | Vehículos, reservas, ventas, transferencias |
 | Almacenero | `almacen@autonexo.test` | Repuestos (kárdex) |
 
+## Verlo desde un celular
+
+1. El celular y la computadora deben estar en la misma red WiFi.
+2. En la computadora ejecuta `composer run celular`. Si Windows pregunta por el firewall para PHP, permite el acceso en **redes privadas**.
+3. Busca la IP de la computadora con `ipconfig` (línea «Dirección IPv4» del adaptador Wi-Fi, por ejemplo `192.168.100.5`).
+4. En el navegador del celular abre `http://192.168.100.5:8000` (con tu IP).
+
+## Correos reales (opcional)
+
+Por defecto los correos («olvidé mi contraseña», verificación) se guardan en `storage/logs/laravel.log` y no se envían.
+Para enviarlos de verdad con Gmail:
+
+1. En tu cuenta de Google activa la verificación en dos pasos y crea una **contraseña de aplicación**.
+2. En `.env` cambia:
+
+   ```env
+   MAIL_MAILER=smtp
+   MAIL_HOST=smtp.gmail.com
+   MAIL_PORT=587
+   MAIL_SCHEME=null
+   MAIL_USERNAME=tu_correo@gmail.com
+   MAIL_PASSWORD=la_contraseña_de_aplicacion
+   MAIL_FROM_ADDRESS=tu_correo@gmail.com
+   MAIL_FROM_NAME=AutoNexo
+   ```
+
+3. Ejecuta `php artisan config:clear`.
+
 ## Comandos útiles
 
 | Comando | Para qué |
 |---|---|
 | `php artisan autonexo:demo` | Borra la base y carga los datos de demostración (pide confirmación) |
-| `php artisan test` | Corre las 448 pruebas sobre la base `autonexo_test` |
+| `php artisan test` | Corre las 454 pruebas sobre la base `autonexo_test` |
 | `php artisan test --filter=CalculadoraDePlan` | Informe del spike PBI-01 (300 casos) |
 | `php artisan autonexo:probar-restauracion --generar` | Respalda, restaura en una base limpia y compara conteos y saldos (CA-21) |
 | `npm run build` | Recompila los estilos si no usas `composer run dev` |
+| `composer run celular` | Abre el sistema para verlo desde un celular en la misma red WiFi |
 
 ---
 
@@ -83,12 +112,12 @@ La contraseña de todos es `password` (solo para la demo local).
 | 05 | Reserva con anticipo y fecha límite; vencimiento automático | CA-05 | `StockYReservasTest` |
 | 07 | Cobro en Bs o USD, efectivo o QR por confirmar; tipo de cambio del día; anulación | CA-07.1 a 07.4 | `CobrosTest` |
 | 13 | Carga inicial desde plantilla de Excel; filas inválidas reportadas | CA-13 | `CargaInicialTest` |
-| 10 | Transferencia: 5 pasos, límite del IMT en días hábiles, alerta y cierre | CA-10.1 a 10.3 | `TransferenciasTest` |
+| 10 | Transferencia: 5 pasos, límite del IMT en días hábiles (sin fines de semana ni feriados de Bolivia), alerta y cierre | CA-10.1 a 10.3 | `TransferenciasTest` |
 | 08 | Cartera por tramos de antigüedad; QR por confirmar aparte; compradores en mora | CA-08 | `CarteraYCajaTest` |
 | 22 | Cierre de caja diario con diferencias registradas y recordatorio | CA-22 | `CarteraYCajaTest` |
 | 21 | Respaldo diario y manual, restauración verificada, exportación solo del dueño | CA-21 | `RespaldosTest` y `autonexo:probar-restauracion` |
 | 09 | Alertas de cuotas vencidas en el panel | CA-09 | `AlertasComprobantesMedicionTest` |
-| 12 | Comprobante y estado de cuenta en PDF, solo con consentimiento | CA-12 | `AlertasComprobantesMedicionTest` |
+| 12 | Comprobante y estado de cuenta en PDF, solo con consentimiento; WhatsApp con enlace firmado para descargar el PDF | CA-12 | `AlertasComprobantesMedicionTest` |
 | 23 | Medición de uso: cobros del mismo día, consultas y tiempos; sin datos personales | CA-23 | `AlertasComprobantesMedicionTest` |
 
 Los 6 PBI diferidos (14 a 19) no se construyen, como dicen los documentos.

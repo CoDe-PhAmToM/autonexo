@@ -63,7 +63,12 @@ test('CA-05: la reserva con anticipo y fecha límite deja el vehículo reservado
         ->and($reserva->fecha_limite->toDateString())->toBe(today()->addDays(7)->toDateString())
         ->and($this->corolla->fresh()->estado)->toBe('reservado');
 
-    $this->get(route('vehiculos.ver', $this->corolla))->assertSee('Reservado para Pedro Limachi');
+    $this->get(route('vehiculos.ver', $this->corolla))
+        ->assertSee('Reservado para Pedro Limachi')
+        ->assertSee('En exhibición</span> → Reservado', false); // el historial muestra el cambio de estado una vez
+
+    $html = $this->get(route('vehiculos.ver', $this->corolla))->getContent();
+    expect(substr_count($html, 'Estado: <span'))->toBe(1);
 });
 
 test('CA-05: no se puede reservar un vehículo reservado', function () {

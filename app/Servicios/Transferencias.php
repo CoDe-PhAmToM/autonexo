@@ -87,8 +87,9 @@ final class Transferencias
         });
     }
 
+    /** Días hábiles: lunes a viernes sin feriados nacionales de Bolivia. */
     public static function sumarDiasHabiles(CarbonImmutable $desde, int $dias): CarbonImmutable
     {
-        return $desde->addWeekdays($dias);
+        return \App\Support\Feriados::sumarDiasHabiles($desde, $dias);
     }
 }

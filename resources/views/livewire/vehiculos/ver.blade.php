@@ -123,7 +123,7 @@ new #[Title('Vehículo')] class extends Component {
                             Vehículo registrado
                         @elseif ($evento->accion === 'actualizado')
                             @foreach ($evento->cambios as $campo => $cambio)
-                                <div>{{ $campos[$campo] ?? $campo }}: @php
+                                @php
                                     $legible = fn ($v) => $campo === 'estado' ? (Vehiculo::ESTADOS[$v] ?? $v) : ($v ?? '—');
                                 @endphp
                                 <div>{{ $campos[$campo] ?? $campo }}: <span class="text-zinc-500 line-through">{{ $legible($cambio['antes']) }}</span> → {{ $legible($cambio['despues']) }}</div>

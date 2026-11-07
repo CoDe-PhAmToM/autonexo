@@ -34,7 +34,19 @@ final class Comprobantes
             ->stream("estado-de-cuenta-venta-{$venta->id}.pdf");
     }
 
-    /** Enlace de WhatsApp con el resumen del pago (el PDF se adjunta a mano). */
+    /**
+     * Enlace firmado para que el comprador descargue su comprobante sin iniciar sesión.
+     * Vence en 7 días y no se puede modificar para ver otro cobro.
+     */
+    public function enlacePublico(Cobro $cobro): string
+    {
+        return \Illuminate\Support\Facades\URL::temporarySignedRoute('comprobantes.publico', now()->addDays(7), ['cobro' => $cobro->id]);
+    }
+
+    /**
+     * Enlace de WhatsApp con el resumen del pago y el enlace para descargar el PDF.
+     * (WhatsApp no permite adjuntar archivos desde un enlace; el comprador lo descarga.)
+     */
     public function enlaceWhatsApp(Cobro $cobro): ?string
     {
         $venta = $cobro->venta;
@@ -45,7 +57,7 @@ final class Comprobantes
         }
 
         $texto = sprintf(
-            "Hola %s, %s registró tu pago N.º %d del %s por %s %s (%s). Saldo pendiente: %s %s. Este mensaje no sustituye a una factura.",
+            "Hola %s, %s registró tu pago N.º %d del %s por %s %s (%s). Saldo pendiente: %s %s. Descarga tu comprobante (válido 7 días): %s . Este mensaje no sustituye a una factura.",
             $venta->comprador->nombre,
             $venta->negocio->nombre,
             $cobro->id,
@@ -55,6 +67,7 @@ final class Comprobantes
             $cobro->estado === 'por_confirmar' ? 'QR por confirmar' : 'confirmado',
             $venta->simboloMoneda(),
             Formato::monto($venta->saldo()),
+            $this->enlacePublico($cobro),
         );
 
         return 'https://wa.me/'.$numero.'?text='.rawurlencode($texto);

@@ -106,4 +106,12 @@ Route::middleware(['auth'])->group(function () {
     });
 });
 
+// PBI-12: el comprador descarga su comprobante con el enlace firmado del mensaje de WhatsApp
+// (sin iniciar sesión; vence en 7 días y no se puede alterar).
+Route::get('comprobante/{cobro}', function (int $cobro) {
+    $cobro = Cobro::withoutGlobalScopes()->findOrFail($cobro);
+
+    return app(\App\Servicios\Comprobantes::class)->pdfDelCobro($cobro);
+})->middleware(['signed', 'throttle:30,1'])->name('comprobantes.publico');
+
 require __DIR__.'/auth.php';
