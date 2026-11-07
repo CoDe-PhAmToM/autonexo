@@ -17,6 +17,9 @@ class VehiculosDemoSeeder extends Seeder
 {
     /** [marca, modelo, año, color, costo USD, precio USD, placa, foto] */
     private const STOCK = [
+        // Los dos sin foto van primero: la vitrina muestra los más recientes arriba.
+        ['Nissan', 'Frontier', 2016, 'Gris', '18500.00', '21400.00', '3650HTU', null],
+        ['Kia', 'Rio', 2017, 'Negro', '9800.00', '11500.00', '3812HXA', null],
         ['Toyota', 'Corolla', 2020, 'Blanco', '15800.00', '17900.00', '4512KTR', 'toyota-corolla.jpg'],
         ['Volkswagen', 'Amarok', 2018, 'Azul', '27500.00', '31200.00', '3987JLM', 'volkswagen-amarok.jpg'],
         ['Hyundai', 'Tucson', 2023, 'Gris', '29900.00', '33500.00', '5120LPD', 'hyundai-tucson.jpg'],
@@ -27,8 +30,6 @@ class VehiculosDemoSeeder extends Seeder
         ['Toyota', 'RAV4', 2019, 'Plata', '24500.00', '27800.00', '4402KHB', 'toyota-rav4.jpg'],
         ['Suzuki', 'Grand Vitara', 2005, 'Plata', '8900.00', '10600.00', '2768DGS', 'suzuki-vitara.jpg'],
         ['Hyundai', 'Accent', 2019, 'Blanco', '12300.00', '14200.00', '4355KCL', 'hyundai-accent.jpg'],
-        ['Nissan', 'Frontier', 2016, 'Gris', '18500.00', '21400.00', '3650HTU', null],
-        ['Kia', 'Rio', 2017, 'Negro', '9800.00', '11500.00', '3812HXA', null],
     ];
 
     public function run(): void

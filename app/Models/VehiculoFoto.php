@@ -24,4 +24,13 @@ class VehiculoFoto extends Model
     {
         return $this->belongsTo(Vehiculo::class);
     }
+
+    /**
+     * Dirección de la foto con una marca única de su archivo: si la foto cambia (o la base se
+     * reinicia y el número se reutiliza), el navegador no muestra una copia vieja de su caché.
+     */
+    public function url(): string
+    {
+        return route('vehiculos.fotos.ver', [$this->vehiculo_id, $this->id]).'?v='.substr(md5($this->path), 0, 10);
+    }
 }

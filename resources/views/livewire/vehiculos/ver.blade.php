@@ -104,16 +104,16 @@ new #[Title('Vehículo')] class extends Component {
         @php $galeria = $vehiculo->fotos; @endphp
         <flux:card class="overflow-hidden p-2 lg:order-first lg:col-span-3">
             @if ($galeria->isNotEmpty())
-                <div x-data="{ actual: '{{ route('vehiculos.fotos.ver', [$vehiculo, $galeria->first()]) }}' }" class="flex flex-col gap-2">
+                <div x-data="{ actual: '{{ $galeria->first()->url() }}' }" class="flex flex-col gap-2">
                     <div class="relative aspect-[16/10] overflow-hidden rounded-xl bg-noche">
-                        <img :src="actual" src="{{ route('vehiculos.fotos.ver', [$vehiculo, $galeria->first()]) }}"
+                        <img :src="actual" src="{{ $galeria->first()->url() }}"
                              alt="Foto de {{ $vehiculo->descripcion() }}" class="size-full object-cover transition duration-500">
                         <span class="absolute bottom-2 right-3 rounded-full bg-noche/70 px-2 py-0.5 font-mono text-[11px] text-cromo">{{ $galeria->count() }} foto(s)</span>
                     </div>
                     @if ($galeria->count() > 1)
                         <div class="grid grid-cols-4 gap-2 sm:grid-cols-6">
                             @foreach ($galeria as $foto)
-                                @php $url = route('vehiculos.fotos.ver', [$vehiculo, $foto]); @endphp
+                                @php $url = $foto->url(); @endphp
                                 <button type="button" x-on:click="actual = '{{ $url }}'"
                                         class="aspect-[4/3] overflow-hidden rounded-lg border transition"
                                         :class="actual === '{{ $url }}' ? 'border-faro shadow-[0_0_14px_-4px_#20E3F2]' : 'border-white/10 opacity-70 hover:opacity-100'"

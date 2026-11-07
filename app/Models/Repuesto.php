@@ -29,6 +29,14 @@ class Repuesto extends Model
         ];
     }
 
+    /** Dirección de la foto con una marca única de su archivo (evita copias viejas en la caché). */
+    public function urlFoto(): ?string
+    {
+        return $this->foto_path
+            ? route('repuestos.foto', $this).'?v='.substr(md5($this->foto_path), 0, 10)
+            : null;
+    }
+
     public function movimientos(): HasMany
     {
         return $this->hasMany(Kardex::class)->latest('id');

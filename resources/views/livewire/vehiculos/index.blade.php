@@ -105,13 +105,13 @@ new #[Title('Vehículos')] class extends Component {
                        class="vidrio entrar group flex flex-col overflow-hidden transition duration-300 hover:-translate-y-1 hover:border-faro/40 hover:shadow-[0_24px_50px_-20px_rgba(32,227,242,.45)]">
                         <div class="relative aspect-[16/10] overflow-hidden">
                             @if ($vehiculo->portada())
-                                <img src="{{ route('vehiculos.foto', $vehiculo) }}" alt="{{ $vehiculo->descripcion() }}" loading="lazy"
+                                <img src="{{ $vehiculo->portada()->url() }}" alt="{{ $vehiculo->descripcion() }}" loading="lazy"
                                      class="size-full object-cover transition duration-700 group-hover:scale-105">
                             @else
                                 <x-silueta-auto class="size-full" :etiqueta="false" />
                             @endif
                             <span class="pointer-events-none absolute inset-0 bg-gradient-to-t from-noche/90 via-transparent to-transparent"></span>
-                            <span class="absolute left-3 top-3"><flux:badge size="sm" :color="$vehiculo->colorEstado()">{{ $vehiculo->nombreEstado() }}</flux:badge></span>
+                            <span class="absolute left-3 top-3 rounded-full bg-noche/70 backdrop-blur-sm"><flux:badge size="sm" :color="$vehiculo->colorEstado()">{{ $vehiculo->nombreEstado() }}</flux:badge></span>
                             @if ($vehiculo->fotos->count() > 1)
                                 <span class="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-noche/70 px-2 py-0.5 font-mono text-[11px] text-cromo">
                                     <flux:icon name="photo" class="size-3.5" /> {{ $vehiculo->fotos->count() }}

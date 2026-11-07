@@ -127,6 +127,22 @@ test('un vehículo tiene una galería de varias fotos y se pueden quitar', funct
     Storage::disk('local')->assertMissing($quitada->path);
 });
 
+test('la dirección de la portada cambia si cambia la foto (sin copias viejas en la caché)', function () {
+    Storage::fake('local');
+    $vendedor = usuarioCon(Roles::VENDEDOR);
+    $this->actingAs($vendedor);
+    $vehiculo = Vehiculo::factory()->for($vendedor->negocio)->create();
+
+    $vehiculo->agregarFotos([UploadedFile::fake()->image('vieja.jpg')]);
+    $antes = $vehiculo->portada()->url();
+
+    $vehiculo->quitarFoto($vehiculo->portada());
+    $vehiculo->agregarFotos([UploadedFile::fake()->image('nueva.jpg')]);
+
+    expect($vehiculo->portada()->url())->not->toBe($antes)
+        ->and($vehiculo->portada()->url())->toContain('?v=');
+});
+
 test('no se pasan de 8 fotos por vehículo', function () {
     Storage::fake('local');
     $vendedor = usuarioCon(Roles::VENDEDOR);
@@ -149,7 +165,7 @@ test('la vitrina muestra los autos con su foto o una silueta, y se puede cambiar
 
     $this->get(route('vehiculos.index'))
         ->assertOk()
-        ->assertSee(route('vehiculos.foto', $conFoto), false)
+        ->assertSee($conFoto->portada()->url(), false)
         ->assertSee('Vehículo sin foto')
         ->assertSee('Toyota Corolla');
 

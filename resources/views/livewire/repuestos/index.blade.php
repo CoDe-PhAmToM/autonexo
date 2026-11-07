@@ -140,7 +140,7 @@ new #[Title('Repuestos')] class extends Component {
                                 <flux:table.cell>
                                     <a href="{{ route('repuestos.ver', $repuesto) }}" wire:navigate class="block size-10 overflow-hidden rounded-lg border border-white/10">
                                         @if ($repuesto->foto_path)
-                                            <img src="{{ route('repuestos.foto', $repuesto) }}" alt="" loading="lazy" class="size-full object-cover">
+                                            <img src="{{ $repuesto->urlFoto() }}" alt="" loading="lazy" class="size-full object-cover">
                                         @else
                                             <x-silueta-repuesto class="size-full" />
                                         @endif

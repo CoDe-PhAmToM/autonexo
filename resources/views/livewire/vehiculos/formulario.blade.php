@@ -142,7 +142,7 @@ new #[Title('Vehículo')] class extends Component {
                     <div class="grid grid-cols-3 gap-3 sm:grid-cols-4">
                         @foreach ($actuales as $f)
                             <div class="group relative aspect-[4/3] overflow-hidden rounded-xl border border-white/10" wire:key="actual-{{ $f->id }}">
-                                <img src="{{ route('vehiculos.fotos.ver', [$vehiculo, $f]) }}" alt="Foto {{ $loop->iteration }}" class="size-full object-cover" loading="lazy">
+                                <img src="{{ $f->url() }}" alt="Foto {{ $loop->iteration }}" class="size-full object-cover" loading="lazy">
                                 @if ($loop->first)
                                     <span class="absolute left-1.5 top-1.5 rounded-full bg-noche/70 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-faro">Portada</span>
                                 @endif

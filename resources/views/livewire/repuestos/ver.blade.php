@@ -67,7 +67,7 @@ new #[Title('Kárdex')] class extends Component {
         <flux:card class="flex flex-col gap-2 p-2">
             <div class="aspect-square overflow-hidden rounded-xl">
                 @if ($repuesto->foto_path)
-                    <img src="{{ route('repuestos.foto', $repuesto) }}?v={{ $repuesto->updated_at?->timestamp }}" alt="Foto de {{ $repuesto->nombre }}" class="size-full object-cover">
+                    <img src="{{ $repuesto->urlFoto() }}" alt="Foto de {{ $repuesto->nombre }}" class="size-full object-cover">
                 @else
                     <x-silueta-repuesto class="size-full" />
                 @endif
