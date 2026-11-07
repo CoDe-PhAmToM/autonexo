@@ -18,14 +18,22 @@ class VentasDemoSeeder extends Seeder
     {
         if (Repuesto::doesntExist()) {
             $repuestos = [
-                ['FIL-ACE-TOY', 'Filtro de aceite Toyota', 24, 10, '45.00'],
+                ['FIL-ACE-TOY', 'Filtro de aceite', 24, 10, '45.00'],
                 ['PAS-FRE-DEL', 'Pastillas de freno delanteras', 6, 8, '280.00'],
-                ['BUJ-NGK-01', 'Bujía NGK', 40, 16, '35.00'],
+                ['BUJ-NGK-01', 'Bujía', 40, 16, '35.00'],
                 ['BAT-12V-65', 'Batería 12V 65 Ah', 1, 2, '890.00'],
-                ['AMO-DEL-HIL', 'Amortiguador delantero Hilux', 4, 2, '620.00'],
+                ['AMO-DEL-HIL', 'Amortiguador delantero', 4, 2, '620.00'],
             ];
             foreach ($repuestos as [$codigo, $nombre, $stock, $minimo, $precio]) {
-                $r = Repuesto::create(['codigo' => $codigo, 'nombre' => $nombre, 'stock_minimo' => $minimo, 'precio_bs' => $precio]);
+                // Foto libre de Unsplash que corresponde a la pieza (la batería no tiene: queda la silueta).
+                $origen = database_path("seeders/fotos/repuestos/{$codigo}.jpg");
+                $foto = null;
+                if (is_file($origen)) {
+                    $foto = 'repuestos/'.auth()->user()->negocio_id.'/'.\Illuminate\Support\Str::uuid().'.jpg';
+                    \Illuminate\Support\Facades\Storage::disk('local')->put($foto, file_get_contents($origen));
+                }
+
+                $r = Repuesto::create(['codigo' => $codigo, 'nombre' => $nombre, 'stock_minimo' => $minimo, 'precio_bs' => $precio, 'foto_path' => $foto]);
                 $r->mover('entrada', $stock, 'Stock inicial');
             }
         }

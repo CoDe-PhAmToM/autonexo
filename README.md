@@ -159,3 +159,24 @@ Fotos del showroom del login, de uso gratuito bajo la [Licencia Unsplash](https:
 
 - Auto entre líneas de luz y auto azul con luces horizontales: [Hyundai Motor Group](https://unsplash.com/@hyundaimotorgroup).
 - SUV azul bajo un foco de estudio: [ObjectType RAW](https://unsplash.com/@objecttyperaw).
+
+Fotos de los datos de demostración (Licencia Unsplash), en `database/seeders/fotos`. Cada una corresponde al modelo o la pieza del stock demo:
+
+| Vehículo o repuesto | Autor |
+|---|---|
+| Toyota Corolla | [Bestami Sarıkaya](https://unsplash.com/@bbestamis) |
+| Volkswagen Amarok | [Pablo Pecantel](https://unsplash.com/@pablopeca) |
+| Hyundai Tucson | [Hyundai Motor Group](https://unsplash.com/@hyundaimotorgroup) |
+| Suzuki Swift | [Angelo Moleele](https://unsplash.com/@angelokarabo053) |
+| Kia Sportage | [Michail Dementiev](https://unsplash.com/@bot_va) |
+| Toyota Hilux | [Ed Wingate](https://unsplash.com/@ed_wingate) |
+| Mitsubishi L200 | [Jack Coble](https://unsplash.com/@jackcoble) |
+| Toyota RAV4 | [Krish Parmar](https://unsplash.com/@photosbykrishp) |
+| Suzuki Grand Vitara | [Alan Berriel](https://unsplash.com/@berrielalan) |
+| Hyundai Accent | [Sahej Brar](https://unsplash.com/@sahejbrar_) |
+| Filtro de aceite | [Jimmy Nilsson Masth](https://unsplash.com/@jimmynilssonmasth) |
+| Pastillas de freno | [Benjamin Brunner](https://unsplash.com/@ben_brunner) |
+| Bujía | [shraga kopstein](https://unsplash.com/@sfkopstein) |
+| Amortiguador | [Salah Ait Mokhtar](https://unsplash.com/@motosha) |
+
+El Nissan Frontier, el Kia Rio y la batería no tienen foto: el sistema muestra su silueta.
