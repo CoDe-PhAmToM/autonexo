@@ -47,15 +47,15 @@ new #[Title('Cartera')] class extends Component {
     @forelse ($resumen as $moneda => $datos)
         <div class="flex flex-col gap-3">
             <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
-                <flux:card class="lg:col-span-2">
+                <flux:card class="tarjeta-dato destacada lg:col-span-2">
                     <div class="text-sm text-zinc-500">Total por cobrar ({{ $simbolo($moneda) }})</div>
-                    <div class="mt-1 text-3xl font-semibold">{{ $simbolo($moneda) }} {{ Formato::monto($datos['total']) }}</div>
+                    <div class="mt-1 font-mono text-3xl tabular-nums texto-vivo" data-contar="{{ $datos['total'] }}" data-prefijo="{{ $simbolo($moneda) }} ">{{ $simbolo($moneda) }} {{ Formato::monto($datos['total']) }}</div>
                     <div class="text-xs text-zinc-500">{{ $datos['cuotas'] }} cuotas con saldo · vencido {{ $simbolo($moneda) }} {{ Formato::monto($datos['vencido']) }}</div>
                 </flux:card>
                 @foreach (Cartera::TRAMOS as $clave => $nombre)
-                    <flux:card>
+                    <flux:card class="tarjeta-dato">
                         <div class="text-sm text-zinc-500">{{ $nombre }}</div>
-                        <div class="mt-1 text-xl font-semibold {{ (float) $datos['tramos'][$clave] > 0 ? $colorTramo[$clave] : '' }}">
+                        <div data-contar="{{ $datos['tramos'][$clave] }}" class="mt-1 font-mono text-xl tabular-nums {{ (float) $datos['tramos'][$clave] > 0 ? $colorTramo[$clave] : '' }}">
                             {{ Formato::monto($datos['tramos'][$clave]) }}
                         </div>
                     </flux:card>

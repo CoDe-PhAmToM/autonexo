@@ -302,3 +302,114 @@ select:focus[data-flux-control] {
 
     .fondo-vivo canvas { display: none; }
 }
+
+/* ------------------------------------------- acabado del resto de pantallas */
+
+/* Títulos de pantalla con la letra de la marca. */
+[data-flux-main] [data-flux-heading].text-2xl {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    letter-spacing: .03em;
+    line-height: 1.35;
+}
+
+[data-flux-main] [data-flux-subheading] {
+    color: var(--color-niebla);
+}
+
+/* Tablas: encabezados en estilo de datos y filas que se iluminan. */
+[data-flux-column] {
+    font-family: var(--font-mono);
+    font-size: 11px !important;
+    font-weight: 500 !important;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--color-niebla) !important;
+}
+
+[data-flux-table] tbody [data-flux-row] {
+    transition: background-color .2s;
+}
+
+[data-flux-table] tbody [data-flux-row]:hover {
+    background-color: rgba(32, 227, 242, .05);
+}
+
+[data-flux-main] table a:hover {
+    color: var(--color-faro);
+}
+
+/* Mensajes y avisos: entran animados y con vidrio. */
+[data-flux-main] [data-flux-callout],
+[data-flux-main] .entrar-aviso {
+    animation: var(--animate-entrar);
+    backdrop-filter: blur(14px);
+}
+
+/* Insignias de estado con un brillo suave de su color. */
+.dark [data-flux-badge] {
+    box-shadow: 0 0 14px -6px currentColor;
+}
+
+/* Campos de formulario un poco más oscuros que el vidrio. */
+.dark input[data-flux-control]:not([type='checkbox']):not([type='radio']):not([type='file']),
+.dark textarea[data-flux-control] {
+    background-color: rgba(5, 6, 11, .45);
+    transition: box-shadow .2s, background-color .2s;
+}
+
+.dark input[data-flux-control]:hover:not([type='checkbox']):not([type='radio']):not([type='file']),
+.dark textarea[data-flux-control]:hover {
+    background-color: rgba(5, 6, 11, .6);
+}
+
+/* Barra de desplazamiento fina y oscura. */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(148, 160, 184, .35) transparent;
+}
+
+/* Barra inferior de accesos en el celular. */
+.barra-movil {
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+    z-index: 15; /* debajo del menú lateral de Flux (z 20) cuando se abre */
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    gap: 4px;
+    padding: 6px;
+    border-radius: 1.25rem;
+    border: 1px solid rgba(255, 255, 255, .14);
+    background: rgba(11, 15, 26, .72);
+    backdrop-filter: blur(20px) saturate(170%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .22), 0 18px 40px -14px rgba(0, 0, 0, .9);
+}
+
+.barra-movil a,
+.barra-movil button {
+    display: grid;
+    justify-items: center;
+    gap: 2px;
+    padding: 6px 2px;
+    border-radius: .9rem;
+    font-size: 10.5px;
+    color: var(--color-niebla);
+    transition: color .2s, background-color .2s;
+}
+
+.barra-movil .actual {
+    color: var(--color-cromo);
+    background: linear-gradient(160deg, rgba(32, 227, 242, .18), rgba(139, 92, 255, .12));
+    box-shadow: inset 0 0 0 1px rgba(32, 227, 242, .35);
+}
+
+@media (min-width: 1024px) {
+    .barra-movil { display: none; }
+}
+
+@media (max-width: 1023.98px) {
+    [data-flux-main] { padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
+}

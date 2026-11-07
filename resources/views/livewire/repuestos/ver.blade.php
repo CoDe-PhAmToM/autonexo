@@ -48,12 +48,12 @@ new #[Title('Kárdex')] class extends Component {
     <div class="grid gap-4 sm:grid-cols-3">
         <flux:card>
             <div class="text-sm text-zinc-500">Stock actual</div>
-            <div class="mt-1 text-3xl font-semibold {{ $repuesto->bajoMinimo() ? 'text-red-500' : '' }}">{{ $repuesto->stock }}</div>
+            <div class="mt-1 font-mono text-3xl tabular-nums {{ $repuesto->bajoMinimo() ? 'text-mora' : '' }}" data-contar="{{ $repuesto->stock }}" data-decimales="0">{{ $repuesto->stock }}</div>
             <div class="text-xs text-zinc-500">{{ $repuesto->unidad }}(s)</div>
         </flux:card>
         <flux:card>
             <div class="text-sm text-zinc-500">Stock mínimo</div>
-            <div class="mt-1 text-3xl font-semibold">{{ $repuesto->stock_minimo }}</div>
+            <div class="mt-1 font-mono text-3xl tabular-nums" data-contar="{{ $repuesto->stock_minimo }}" data-decimales="0">{{ $repuesto->stock_minimo }}</div>
             @if ($repuesto->bajoMinimo())
                 <flux:badge size="sm" color="red" class="mt-1">Bajo el mínimo: reponer</flux:badge>
             @endif

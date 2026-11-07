@@ -63,15 +63,15 @@ new #[Title('Carga inicial')] class extends Component {
         <div class="grid gap-4 sm:grid-cols-3">
             <flux:card>
                 <div class="text-sm text-zinc-500">Vehículos cargados</div>
-                <div class="mt-1 text-3xl font-semibold">{{ $resultado['vehiculos'] }}</div>
+                <div class="mt-1 font-mono text-3xl tabular-nums text-pago">{{ $resultado['vehiculos'] }}</div>
             </flux:card>
             <flux:card>
                 <div class="text-sm text-zinc-500">Ventas cargadas</div>
-                <div class="mt-1 text-3xl font-semibold">{{ $resultado['ventas'] }}</div>
+                <div class="mt-1 font-mono text-3xl tabular-nums text-pago">{{ $resultado['ventas'] }}</div>
             </flux:card>
             <flux:card>
                 <div class="text-sm text-zinc-500">Filas con errores</div>
-                <div class="mt-1 text-3xl font-semibold {{ count($resultado['errores']) ? 'text-red-500' : '' }}">
+                <div class="mt-1 font-mono text-3xl tabular-nums {{ count($resultado['errores']) ? 'text-mora' : '' }}">
                     {{ collect($resultado['errores'])->unique(fn ($e) => $e['hoja'].$e['fila'])->count() }}
                 </div>
             </flux:card>

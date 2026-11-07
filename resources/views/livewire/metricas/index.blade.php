@@ -36,25 +36,25 @@ new #[Title('Medición de uso')] class extends Component {
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <flux:card>
             <div class="text-sm text-zinc-500">Cobros registrados el mismo día</div>
-            <div class="mt-1 text-3xl font-semibold">{{ $pct($actual['mismo_dia']) }}</div>
+            <div class="mt-1 font-mono text-3xl tabular-nums" @if ($actual['mismo_dia'] !== null) data-contar="{{ $actual['mismo_dia'] }}" data-decimales="1" data-sufijo=" %" @endif>{{ $pct($actual['mismo_dia']) }}</div>
             <div class="text-xs text-zinc-500">Semana anterior: {{ $pct($anterior['mismo_dia'] ?? null) }}</div>
             <flux:badge size="sm" class="mt-1" :color="$estado($actual['mismo_dia'], Metricas::META_MISMO_DIA)">HP-03 · meta {{ Metricas::META_MISMO_DIA }} %</flux:badge>
         </flux:card>
         <flux:card>
             <div class="text-sm text-zinc-500">Consultas de cartera esta semana</div>
-            <div class="mt-1 text-3xl font-semibold">{{ $actual['consultas'] }}</div>
+            <div class="mt-1 font-mono text-3xl tabular-nums" data-contar="{{ $actual['consultas'] }}" data-decimales="0">{{ $actual['consultas'] }}</div>
             <div class="text-xs text-zinc-500">Semana anterior: {{ $anterior['consultas'] ?? 0 }}</div>
             <flux:badge size="sm" class="mt-1" :color="$actual['consultas'] >= Metricas::META_CONSULTAS ? 'green' : 'red'">HP-01 · meta {{ Metricas::META_CONSULTAS }} o más</flux:badge>
         </flux:card>
         <flux:card>
             <div class="text-sm text-zinc-500">Consultas de cartera en menos de 1 minuto</div>
-            <div class="mt-1 text-3xl font-semibold">{{ $pct($actual['consultas_rapidas']) }}</div>
+            <div class="mt-1 font-mono text-3xl tabular-nums" @if ($actual['consultas_rapidas'] !== null) data-contar="{{ $actual['consultas_rapidas'] }}" data-decimales="1" data-sufijo=" %" @endif>{{ $pct($actual['consultas_rapidas']) }}</div>
             <div class="text-xs text-zinc-500">Semana anterior: {{ $pct($anterior['consultas_rapidas'] ?? null) }}</div>
             <flux:badge size="sm" class="mt-1" :color="$estado($actual['consultas_rapidas'], 90)">Meta 90 %</flux:badge>
         </flux:card>
         <flux:card>
             <div class="text-sm text-zinc-500">Tiempo para registrar un cobro (mediana)</div>
-            <div class="mt-1 text-3xl font-semibold">{{ $seg($actual['mediana_cobro']) }}</div>
+            <div class="mt-1 font-mono text-3xl tabular-nums" @if ($actual['mediana_cobro'] !== null) data-contar="{{ $actual['mediana_cobro'] }}" data-decimales="1" data-sufijo=" s" @endif>{{ $seg($actual['mediana_cobro']) }}</div>
             <div class="text-xs text-zinc-500">Semana anterior: {{ $seg($anterior['mediana_cobro'] ?? null) }}</div>
             <flux:badge size="sm" class="mt-1" :color="$actual['mediana_cobro'] === null ? 'zinc' : ($actual['mediana_cobro'] < Metricas::META_SEGUNDOS ? 'green' : 'red')">Meta menos de 60 s</flux:badge>
         </flux:card>

@@ -107,21 +107,21 @@ new #[Title('Venta')] class extends Component {
     @endif
 
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <flux:card>
+        <flux:card class="tarjeta-dato">
             <div class="text-sm text-zinc-500">Precio</div>
-            <div class="mt-1 text-2xl font-semibold">{{ $m($venta->precio) }}</div>
+            <div class="mt-1 font-mono text-2xl tabular-nums" data-contar="{{ $venta->precio }}" data-prefijo="{{ $venta->simboloMoneda() }} ">{{ $m($venta->precio) }}</div>
             <div class="text-xs text-zinc-500">{{ $venta->tipo === 'credito' ? 'A crédito' : 'Al contado' }}</div>
         </flux:card>
-        <flux:card>
+        <flux:card class="tarjeta-dato">
             <div class="text-sm text-zinc-500">Cuota inicial</div>
-            <div class="mt-1 text-2xl font-semibold">{{ $m($venta->inicial) }}</div>
+            <div class="mt-1 font-mono text-2xl tabular-nums" data-contar="{{ $venta->inicial }}" data-prefijo="{{ $venta->simboloMoneda() }} ">{{ $m($venta->inicial) }}</div>
         </flux:card>
-        <flux:card>
+        <flux:card class="tarjeta-dato destacada">
             <div class="text-sm text-zinc-500">Saldo por cobrar</div>
-            <div class="mt-1 text-2xl font-semibold">{{ $m($venta->saldo()) }}</div>
+            <div class="mt-1 font-mono text-2xl tabular-nums texto-vivo" data-contar="{{ $venta->saldo() }}" data-prefijo="{{ $venta->simboloMoneda() }} ">{{ $m($venta->saldo()) }}</div>
             <div class="text-xs text-zinc-500">{{ $venta->numero_cuotas }} cuota(s) · solo pagos confirmados</div>
         </flux:card>
-        <flux:card>
+        <flux:card class="tarjeta-dato">
             <div class="text-sm text-zinc-500">Tipo de cambio</div>
             <div class="mt-1 font-semibold">{{ Venta::REGLAS_TC[$venta->regla_tc] }}</div>
             @if ($venta->tc_pactado)

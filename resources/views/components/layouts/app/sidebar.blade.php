@@ -154,6 +154,28 @@
 
         {{ $slot }}
 
+        {{-- Barra inferior de accesos en el celular (se oculta en pantallas grandes). --}}
+        @php
+            $accesos = [['dashboard', 'dashboard', 'home', 'Panel']];
+            if (auth()->user()->can('vehiculos.ver')) $accesos[] = ['vehiculos.index', 'vehiculos.*', 'truck', 'Vehículos'];
+            if (auth()->user()->can('cobros.registrar')) $accesos[] = ['cobros.index', 'cobros.*', 'currency-dollar', 'Cobros'];
+            elseif (auth()->user()->can('ver-ventas')) $accesos[] = ['ventas.index', 'ventas.*', 'banknotes', 'Ventas'];
+            if (auth()->user()->can('cartera.ver')) $accesos[] = ['cartera.index', 'cartera.*', 'chart-bar', 'Cartera'];
+            elseif (auth()->user()->can('repuestos.gestionar')) $accesos[] = ['repuestos.index', 'repuestos.*', 'wrench-screwdriver', 'Repuestos'];
+        @endphp
+        <nav class="barra-movil" aria-label="Accesos rápidos">
+            @foreach ($accesos as [$ruta, $patron, $icono, $texto])
+                <a href="{{ route($ruta) }}" wire:navigate @class(['actual' => request()->routeIs($patron)])>
+                    <flux:icon :name="$icono" class="size-5" />
+                    <span>{{ $texto }}</span>
+                </a>
+            @endforeach
+            <button type="button" x-data x-on:click="$dispatch('flux-sidebar-toggle')">
+                <flux:icon name="bars-3" class="size-5" />
+                <span>Menú</span>
+            </button>
+        </nav>
+
         @fluxScripts
     </body>
 </html>

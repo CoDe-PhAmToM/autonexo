@@ -89,7 +89,8 @@ function contar(raiz) {
         const fin = parseFloat(el.dataset.contar);
         const decimales = el.dataset.decimales !== undefined ? parseInt(el.dataset.decimales, 10) : 2;
         const prefijo = el.dataset.prefijo || '';
-        const finalTexto = prefijo + formato(fin, decimales);
+        const sufijo = el.dataset.sufijo || '';
+        const finalTexto = prefijo + formato(fin, decimales) + sufijo;
         if (reducir || !isFinite(fin)) {
             el.textContent = finalTexto;
             return;
@@ -100,7 +101,7 @@ function contar(raiz) {
             if (inicio === null) inicio = t;
             const p = Math.min(1, Math.max(0, (t - inicio - retraso) / duracion));
             const suave = 1 - Math.pow(1 - p, 4);
-            el.textContent = p < 1 ? prefijo + formato(fin * suave, decimales) : finalTexto;
+            el.textContent = p < 1 ? prefijo + formato(fin * suave, decimales) + sufijo : finalTexto;
             if (p < 1) requestAnimationFrame(paso);
         };
         requestAnimationFrame(paso);

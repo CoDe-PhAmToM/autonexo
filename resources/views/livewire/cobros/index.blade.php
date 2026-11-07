@@ -96,7 +96,7 @@ new #[Title('Cobros')] class extends Component {
         <flux:card>
             <flux:heading size="lg">Tipo de cambio</flux:heading>
             @if ($this->tipoCambio)
-                <div class="mt-2 text-3xl font-semibold">Bs {{ Formato::monto($this->tipoCambio->valor) }}</div>
+                <div class="mt-2 font-mono text-3xl tabular-nums texto-vivo">Bs {{ Formato::monto($this->tipoCambio->valor) }}</div>
                 <div class="text-sm text-zinc-500">por 1 USD · {{ $this->tipoCambio->fuente }} del {{ $this->tipoCambio->fecha->format('d/m/Y') }}</div>
             @else
                 <div class="mt-2 text-sm text-zinc-500">Todavía no hay tipo de cambio registrado.</div>
