@@ -1,6 +1,14 @@
 @import 'tailwindcss';
 @import '../../vendor/livewire/flux/dist/flux.css';
 
+/* Tipografías de la marca, instaladas en el proyecto (funcionan sin internet). */
+@import '@fontsource/hanken-grotesk/400.css';
+@import '@fontsource/hanken-grotesk/500.css';
+@import '@fontsource/hanken-grotesk/600.css';
+@import '@fontsource/michroma/400.css';
+@import '@fontsource/ibm-plex-mono/400.css';
+@import '@fontsource/ibm-plex-mono/500.css';
+
 @source "../views";
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../vendor/livewire/flux-pro/stubs/**/*.blade.php';
@@ -8,42 +16,72 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/*
+ * Marca AutoNexo — «Showroom de noche, faros encendidos».
+ * Ver D:\AutoNexo\marca\autonexo-marca.html.
+ */
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: 'Hanken Grotesk', 'Segoe UI', ui-sans-serif, system-ui, sans-serif;
+    --font-display: 'Michroma', 'Eurostile', 'Arial Black', sans-serif;
+    --font-mono: 'IBM Plex Mono', ui-monospace, 'Cascadia Mono', monospace;
 
-    --color-zinc-50: #fafafa;
-    --color-zinc-100: #f5f5f5;
-    --color-zinc-200: #e5e5e5;
-    --color-zinc-300: #d4d4d4;
-    --color-zinc-400: #a3a3a3;
-    --color-zinc-500: #737373;
-    --color-zinc-600: #525252;
-    --color-zinc-700: #404040;
-    --color-zinc-800: #262626;
-    --color-zinc-900: #171717;
-    --color-zinc-950: #0a0a0a;
+    --color-noche: #05060B;
+    --color-asfalto: #0B0F1A;
+    --color-grafito: #141A28;
+    --color-cromo: #EEF2F8;
+    --color-niebla: #94A0B8;
+    --color-nexo: #2F6BFF;
+    --color-faro: #20E3F2;
+    --color-turbo: #8B5CFF;
+    --color-pago: #22E39B;
+    --color-senal: #FFB630;
+    --color-mora: #FF4D6A;
 
-    --color-accent: var(--color-neutral-800);
-    --color-accent-content: var(--color-neutral-800);
-    --color-accent-foreground: var(--color-white);
+    /* Los grises de Flux pasan a la escala azulada de la marca. */
+    --color-zinc-50: #EEF2F8;
+    --color-zinc-100: #DDE3EE;
+    --color-zinc-200: #C3CCDB;
+    --color-zinc-300: #A5B0C4;
+    --color-zinc-400: #94A0B8;
+    --color-zinc-500: #6B7790;
+    --color-zinc-600: #4A5570;
+    --color-zinc-700: #2A3247;
+    --color-zinc-800: #141A28;
+    --color-zinc-900: #0B0F1A;
+    --color-zinc-950: #05060B;
+
+    --color-accent: #20E3F2;
+    --color-accent-content: #20E3F2;
+    --color-accent-foreground: #05060B;
+
+    --animate-entrar: entrar .75s cubic-bezier(.2, .8, .2, 1) both;
 }
 
 @layer theme {
     .dark {
-        --color-accent: var(--color-white);
-        --color-accent-content: var(--color-white);
-        --color-accent-foreground: var(--color-neutral-800);
+        --color-accent: #20E3F2;
+        --color-accent-content: #20E3F2;
+        --color-accent-foreground: #05060B;
     }
 }
 
 @layer base {
-
     *,
     ::after,
     ::before,
     ::backdrop,
     ::file-selector-button {
         border-color: var(--color-gray-200, currentColor);
+    }
+
+    body {
+        background-color: var(--color-noche);
+        color: var(--color-cromo);
+    }
+
+    ::selection {
+        background: color-mix(in oklab, var(--color-nexo), transparent 40%);
+        color: var(--color-cromo);
     }
 }
 
@@ -52,15 +90,215 @@
 }
 
 [data-flux-label] {
-    @apply  !mb-0 !leading-tight;
+    @apply !mb-0 !leading-tight;
 }
 
 input:focus[data-flux-control],
 textarea:focus[data-flux-control],
 select:focus[data-flux-control] {
-    @apply outline-hidden ring-2 ring-accent ring-offset-2 ring-offset-accent-foreground;
+    @apply outline-hidden ring-2 ring-accent ring-offset-2 ring-offset-noche;
 }
 
-/* \[:where(&)\]:size-4 {
-    @apply size-4;
-} */
+/* ------------------------------------------------------------------ vidrio */
+
+@property --ang {
+    syntax: '<angle>';
+    initial-value: 0deg;
+    inherits: false;
+}
+
+.vidrio,
+.dark [data-flux-card] {
+    background: linear-gradient(160deg, rgba(255, 255, 255, .10), rgba(255, 255, 255, .03) 60%, rgba(139, 92, 255, .05));
+    border: 1px solid rgba(255, 255, 255, .13);
+    border-radius: 1.25rem;
+    backdrop-filter: blur(20px) saturate(170%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .28), 0 24px 60px -28px rgba(0, 0, 0, .85);
+    position: relative;
+    isolation: isolate;
+}
+
+/* Las tarjetas entran en cascada al abrir cada pantalla (el orden lo pone app.js). */
+[data-flux-main] [data-flux-card],
+.entrar {
+    animation: var(--animate-entrar);
+    animation-delay: calc(var(--i, 0) * 90ms + 60ms);
+}
+
+/* Brillo que sigue al mouse. */
+.dark [data-flux-card]::after,
+.vidrio::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(320px circle at var(--mx, 50%) var(--my, -60%), rgba(32, 227, 242, .16), rgba(139, 92, 255, .06) 45%, transparent 70%);
+    opacity: 0;
+    transition: opacity .35s;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.dark [data-flux-card]:hover::after,
+.vidrio:hover::after {
+    opacity: 1;
+}
+
+/* Tarjetas de datos del panel: se inclinan, se encienden y su borde de luz gira. */
+.tarjeta-dato {
+    transition: transform .25s ease-out, box-shadow .3s, border-color .3s;
+    transform-style: preserve-3d;
+    overflow: hidden;
+}
+
+.tarjeta-dato::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: conic-gradient(from var(--ang), transparent 0 60%, #20E3F2 75%, #8B5CFF 85%, transparent 95%);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity .3s;
+    animation: girar 4s linear infinite;
+    pointer-events: none;
+}
+
+.tarjeta-dato.destacada::before,
+.tarjeta-dato:hover::before {
+    opacity: 1;
+}
+
+.tarjeta-dato:hover {
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .3), 0 30px 60px -24px rgba(32, 227, 242, .45);
+}
+
+.tarjeta-dato .reflejo {
+    position: absolute;
+    top: -20%;
+    bottom: -20%;
+    left: -60%;
+    width: 45%;
+    background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .16), transparent);
+    transform: skewX(-18deg);
+    animation: reflejo 1.2s ease-out both;
+    animation-delay: calc(var(--i, 0) * 90ms + 650ms);
+    pointer-events: none;
+}
+
+/* Mini barras que crecen. */
+.barras {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    height: 38px;
+}
+
+.barras > span {
+    flex: 1;
+    min-height: 3px;
+    border-radius: 5px 5px 2px 2px;
+    background: var(--b);
+    height: var(--h);
+    transform-origin: bottom;
+    box-shadow: 0 0 14px -3px var(--b);
+    animation: crecer .9s cubic-bezier(.2, .8, .2, 1) both;
+    animation-delay: calc(var(--i, 0) * 90ms + 450ms + var(--j, 0) * 90ms);
+}
+
+/* Texto con el degradado de la marca en movimiento. */
+.texto-vivo {
+    background: linear-gradient(120deg, #2F6BFF, #20E3F2 55%, #8B5CFF, #2F6BFF);
+    background-size: 220% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: correr 6s linear infinite;
+}
+
+/* Punto verde tipo radar: el sistema está en vivo. */
+.punto-vivo {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-pago);
+    animation: radar 1.8s infinite;
+}
+
+/* ------------------------------------------------- botón principal de Flux */
+
+[data-flux-button][class*='bg-[var(--color-accent)]'] {
+    background-image: linear-gradient(120deg, #2F6BFF, #20E3F2 55%, #8B5CFF);
+    background-size: 160% 100%;
+    background-position: 0 0;
+    color: #05060B;
+    font-weight: 600;
+    box-shadow: 0 10px 28px -12px rgba(32, 227, 242, .9);
+    transition: background-position .5s, box-shadow .25s, transform .2s;
+}
+
+[data-flux-button][class*='bg-[var(--color-accent)]']:hover {
+    background-position: 100% 0;
+    box-shadow: 0 14px 34px -10px rgba(32, 227, 242, 1);
+    transform: translateY(-1px);
+}
+
+/* -------------------------------------------------------- fondo animado */
+
+.fondo-vivo {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    overflow: hidden;
+    background: var(--color-noche);
+}
+
+.fondo-vivo .mancha {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(70px);
+    mix-blend-mode: screen;
+}
+
+.fondo-vivo .m1 { width: 58vmax; height: 44vmax; left: -14vmax; top: -12vmax; background: radial-gradient(circle, rgba(47, 107, 255, .55), transparent 62%); animation: d1 18s ease-in-out infinite alternate; }
+.fondo-vivo .m2 { width: 50vmax; height: 42vmax; right: -16vmax; top: 18vh; background: radial-gradient(circle, rgba(32, 227, 242, .32), transparent 62%); animation: d2 22s ease-in-out infinite alternate; }
+.fondo-vivo .m3 { width: 46vmax; height: 40vmax; left: 20vw; top: 55vh; background: radial-gradient(circle, rgba(139, 92, 255, .38), transparent 62%); animation: d3 20s ease-in-out infinite alternate; }
+.fondo-vivo .m4 { width: 40vmax; height: 26vmax; right: 10vw; bottom: -14vmax; background: radial-gradient(circle, rgba(238, 242, 248, .10), transparent 70%); animation: d4 26s ease-in-out infinite alternate; }
+.fondo-vivo canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.fondo-vivo .grano { position: absolute; inset: 0; opacity: .05; background-image: radial-gradient(rgba(255, 255, 255, .8) .6px, transparent .6px); background-size: 3px 3px; }
+
+/* ------------------------------------------------------------ animaciones */
+
+@keyframes entrar { from { opacity: 0; transform: translateY(18px) scale(.98); filter: blur(6px); } to { opacity: 1; transform: none; filter: none; } }
+@keyframes girar { to { --ang: 360deg; } }
+@keyframes reflejo { from { left: -60%; } to { left: 140%; } }
+@keyframes crecer { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+@keyframes correr { to { background-position: 220% 0; } }
+@keyframes radar { 0% { box-shadow: 0 0 0 0 rgba(34, 227, 155, .7); } 100% { box-shadow: 0 0 0 10px rgba(34, 227, 155, 0); } }
+@keyframes d1 { to { transform: translate(18vw, 14vh) scale(1.2); } }
+@keyframes d2 { to { transform: translate(-16vw, 10vh) scale(.85); } }
+@keyframes d3 { to { transform: translate(-14vw, -18vh) scale(1.25); } }
+@keyframes d4 { to { transform: translate(-10vw, -10vh) scale(1.15); } }
+@keyframes dibujar { from { stroke-dashoffset: 120; } to { stroke-dashoffset: 0; } }
+@keyframes encender { from { transform: scale(0); } to { transform: scale(1); } }
+@keyframes latido { 0%, 100% { opacity: .5; transform: scale(.94); } 50% { opacity: 1; transform: scale(1.12); } }
+
+.logo-trazo { stroke-dasharray: 120; animation: dibujar 1.6s .2s cubic-bezier(.65, 0, .35, 1) both; }
+.logo-nodo { transform-box: fill-box; transform-origin: center; animation: encender .5s 1.4s cubic-bezier(.34, 1.56, .64, 1) both; }
+.logo-halo { animation: latido 3.2s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation: none !important;
+        transition: none !important;
+    }
+
+    .fondo-vivo canvas { display: none; }
+}

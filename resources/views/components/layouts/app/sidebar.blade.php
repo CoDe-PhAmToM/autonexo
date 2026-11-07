@@ -3,12 +3,13 @@
     <head>
         @include('partials.head')
     </head>
-    <body class="min-h-screen bg-white dark:bg-zinc-800">
-        <flux:sidebar sticky stashable class="border-r border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
+    <body class="min-h-screen bg-noche font-sans text-cromo antialiased">
+        <x-fondo-vivo />
+        <flux:sidebar sticky stashable class="border-r border-white/10 bg-asfalto/55 backdrop-blur-2xl backdrop-saturate-150">
             <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
 
-            <a href="{{ route('dashboard') }}" class="mr-5 flex items-center space-x-2" wire:navigate>
-                <x-app-logo class="size-8" href="#"></x-app-logo>
+            <a href="{{ route('dashboard') }}" class="mr-5 flex items-center gap-2 px-1 py-1" wire:navigate>
+                <x-app-logo />
             </a>
 
             <flux:navlist variant="outline">
@@ -102,7 +103,7 @@
         </flux:sidebar>
 
         <!-- Mobile User Menu -->
-        <flux:header class="lg:hidden">
+        <flux:header class="border-b border-white/10 bg-asfalto/60 backdrop-blur-2xl lg:hidden">
             <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
 
             <flux:spacer />

@@ -12,7 +12,7 @@
 </head>
 <body>
     <div class="head">
-        <span class="logo">AN</span>
+        @include('pdf.logo')
         <strong>{{ $negocio->nombre }}</strong>
         <span class="muted">· {{ $negocio->ciudad }}@if ($negocio->nit) · NIT {{ $negocio->nit }}@endif @if ($negocio->telefono) · Tel. {{ $negocio->telefono }}@endif</span>
     </div>

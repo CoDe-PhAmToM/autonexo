@@ -4,8 +4,10 @@
     h1 { font-size: 17px; margin: 0 0 2px; }
     h2 { font-size: 13px; margin: 18px 0 6px; }
     .muted { color: #6b7280; }
-    .head { border-bottom: 2px solid #4f46e5; padding-bottom: 8px; margin-bottom: 12px; }
-    .logo { display: inline-block; background: #4f46e5; color: #fff; font-weight: bold; padding: 6px 8px; border-radius: 4px; margin-right: 8px; }
+    .head { border-bottom: 2px solid #2F6BFF; padding-bottom: 8px; margin-bottom: 12px; }
+    .logo { width: 26px; height: 26px; vertical-align: middle; margin-right: 6px; }
+    .marca-texto { font-weight: bold; letter-spacing: 2px; color: #0B0F1A; vertical-align: middle; font-size: 13px; }
+    .marca-nexo { color: #2F6BFF; }
     table { width: 100%; border-collapse: collapse; }
     th, td { padding: 5px 6px; text-align: left; }
     th { background: #f3f4f6; font-weight: bold; }
