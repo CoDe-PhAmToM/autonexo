@@ -26,7 +26,7 @@ class Cobro extends Model
     public const MEDIOS = ['efectivo' => 'Efectivo', 'qr' => 'QR', 'carga_inicial' => 'Carga inicial'];
 
     protected $fillable = [
-        'negocio_id', 'venta_id', 'user_id', 'medio', 'moneda_pago', 'monto_pago', 'tc_aplicado',
+        'negocio_id', 'venta_id', 'user_id', 'medio', 'fecha_pago', 'moneda_pago', 'monto_pago', 'tc_aplicado',
         'fuente_tc', 'motivo_tc', 'monto_aplicado', 'estado', 'comprobante_path',
     ];
 
@@ -36,6 +36,7 @@ class Cobro extends Model
             'monto_pago' => 'decimal:2',
             'monto_aplicado' => 'decimal:2',
             'tc_aplicado' => 'decimal:4',
+            'fecha_pago' => 'date',
             'confirmado_at' => 'datetime',
             'anulado_at' => 'datetime',
         ];
@@ -54,6 +55,12 @@ class Cobro extends Model
     public function cuotas(): BelongsToMany
     {
         return $this->belongsToMany(Cuota::class, 'cobro_cuota')->withPivot('monto')->orderBy('numero');
+    }
+
+    /** PBI-23: se registró el mismo día en que se recibió el pago. */
+    public function registradoElMismoDia(): bool
+    {
+        return $this->fecha_pago?->toDateString() === $this->created_at->toDateString();
     }
 
     public function porConfirmar(): bool

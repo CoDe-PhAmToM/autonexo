@@ -40,6 +40,9 @@
                 @can('usuarios.gestionar')
                     <flux:navlist.group heading="Administración" class="grid">
                         <flux:navlist.item icon="users" :href="route('usuarios.index')" :current="request()->routeIs('usuarios.*')" wire:navigate>Usuarios</flux:navlist.item>
+                        @can('metricas.ver')
+                            <flux:navlist.item icon="presentation-chart-line" :href="route('metricas.index')" :current="request()->routeIs('metricas.*')" wire:navigate>Medición de uso</flux:navlist.item>
+                        @endcan
                         @can('respaldos.gestionar')
                             <flux:navlist.item icon="circle-stack" :href="route('respaldos.index')" :current="request()->routeIs('respaldos.*')" wire:navigate>Respaldos</flux:navlist.item>
                         @endcan

@@ -27,7 +27,7 @@ final class Cobros
     }
 
     /**
-     * @param  array{medio:string, moneda_pago:string, monto:string, tc?:?string, motivo_tc?:?string, comprobante_path?:?string}  $datos
+     * @param  array{medio:string, fecha_pago?:?string, moneda_pago:string, monto:string, tc?:?string, motivo_tc?:?string, comprobante_path?:?string}  $datos
      */
     public function registrar(Venta $venta, array $datos): Cobro
     {
@@ -38,6 +38,11 @@ final class Cobros
             if (CalculadoraDePlan::aCentavos($datos['monto']) <= 0) {
                 throw ValidationException::withMessages(['monto' => 'El monto debe ser mayor a cero.']);
             }
+            $fechaPago = \Carbon\CarbonImmutable::parse($datos['fecha_pago'] ?? today());
+            if ($fechaPago->gt(today())) {
+                throw ValidationException::withMessages(['fecha_pago' => 'La fecha del pago no puede ser futura.']);
+            }
+
             if ($datos['medio'] === 'qr' && empty($datos['comprobante_path'])) {
                 throw ValidationException::withMessages(['comprobante' => 'Adjunta la captura del pago por QR.']);
             }
@@ -64,6 +69,7 @@ final class Cobros
                 'venta_id' => $venta->id,
                 'user_id' => auth()->id(),
                 'medio' => $datos['medio'],
+                'fecha_pago' => $fechaPago->toDateString(),
                 'moneda_pago' => $datos['moneda_pago'],
                 'monto_pago' => $datos['monto'],
                 'tc_aplicado' => $tc,

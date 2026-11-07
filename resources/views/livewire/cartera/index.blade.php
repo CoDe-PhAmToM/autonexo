@@ -10,9 +10,15 @@ use Livewire\Volt\Component;
  * y QR por confirmar aparte.
  */
 new #[Title('Cartera')] class extends Component {
-    public function mount(): void
+    public function mount(Cartera $cartera): void
     {
         abort_unless(auth()->user()->can('cartera.ver'), 403);
+
+        // PBI-23: cada consulta de cartera se cuenta, con el tiempo que tarda en calcularse.
+        $inicio = microtime(true);
+        $cartera->resumen(auth()->user()->negocio_id);
+        $cartera->enMora(auth()->user()->negocio_id);
+        app(\App\Servicios\Metricas::class)->carteraConsultada(auth()->user()->negocio_id, microtime(true) - $inicio);
     }
 
     public function with(Cartera $cartera): array

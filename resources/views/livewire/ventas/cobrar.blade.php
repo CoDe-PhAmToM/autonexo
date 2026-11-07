@@ -24,12 +24,18 @@ new #[Title('Cobrar')] class extends Component {
     public string $tc = '';
     public string $motivo_tc = '';
     public $comprobante = null;
+    public string $fecha_pago = '';
+
+    /** PBI-23: momento en que se abrió el formulario, para medir cuánto toma registrar el cobro. */
+    public float $abiertoEn = 0;
 
     public function mount(): void
     {
         abort_unless(auth()->user()->can('cobros.registrar'), 403);
         $this->venta->load('vehiculo', 'comprador', 'cuotas');
         $this->tc = (string) (TipoCambio::vigente()?->valor ?? '');
+        $this->fecha_pago = today()->toDateString();
+        $this->abiertoEn = microtime(true);
     }
 
     #[Computed]
@@ -82,10 +88,12 @@ new #[Title('Cobrar')] class extends Component {
             'tc' => ['nullable', 'regex:/^\d{1,4}(\.\d{1,4})?$/'],
             'motivo_tc' => ['nullable', 'string', 'max:255'],
             'comprobante' => [Rule::requiredIf($this->medio === 'qr'), 'nullable', 'image', 'max:4096'],
+            'fecha_pago' => ['required', 'date', 'before_or_equal:today', 'after_or_equal:'.today()->subDays(60)->toDateString()],
         ], [
+            'fecha_pago.before_or_equal' => 'La fecha del pago no puede ser futura.',
             'monto.regex' => 'Escribe el monto con punto y hasta 2 decimales (ej. 6130.00).',
             'comprobante.required' => 'Adjunta la captura del pago por QR.',
-        ], ['tc' => 'tipo de cambio', 'comprobante' => 'captura del QR']);
+        ], ['tc' => 'tipo de cambio', 'comprobante' => 'captura del QR', 'fecha_pago' => 'fecha del pago']);
 
         $datos = $this->datos();
         if ($this->comprobante) {
@@ -93,6 +101,7 @@ new #[Title('Cobrar')] class extends Component {
         }
 
         $cobro = $cobros->registrar($this->venta, $datos);
+        app(\App\Servicios\Metricas::class)->cobroRegistrado($cobro, $this->abiertoEn > 0 ? microtime(true) - $this->abiertoEn : null);
 
         session()->flash('estado', $cobro->estado === 'por_confirmar'
             ? 'Cobro por QR registrado: queda por confirmar.'
@@ -104,6 +113,7 @@ new #[Title('Cobrar')] class extends Component {
     {
         return [
             'medio' => $this->medio,
+            'fecha_pago' => $this->fecha_pago,
             'moneda_pago' => $this->moneda_pago,
             'monto' => $this->monto,
             'tc' => $this->necesitaTc ? $this->tc : null,
@@ -144,6 +154,9 @@ new #[Title('Cobrar')] class extends Component {
                         <flux:radio value="USD" label="Dólares" />
                     </flux:radio.group>
                 </div>
+
+                <flux:input wire:model="fecha_pago" type="date" label="Fecha en que se recibió el pago"
+                    description="Si registras un pago de otro día, cambia la fecha: así se mide el registro del mismo día." />
 
                 <flux:input wire:model.live.debounce.400ms="monto" label="Monto recibido ({{ $moneda_pago === 'BOB' ? 'Bs' : 'USD' }})" inputmode="decimal" required placeholder="6130.00" />
 
