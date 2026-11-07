@@ -58,6 +58,14 @@ new #[Title('Venta')] class extends Component {
         session()->flash('estado', 'Pago por QR confirmado.');
     }
 
+    /** PBI-12: el comprador autoriza (o retira) el envío de comprobantes. Queda en la bitácora. */
+    public function cambiarConsentimiento(bool $acepta): void
+    {
+        abort_unless(auth()->user()->canAny(['ventas.registrar', 'cobros.registrar']), 403);
+        $this->venta->comprador->registrarConsentimiento($acepta);
+        session()->flash('estado', $acepta ? 'Consentimiento registrado: ya se pueden enviar comprobantes.' : 'Consentimiento retirado.');
+    }
+
     public function registrarEntrega(Transferencias $transferencias): void
     {
         abort_unless(auth()->user()->can('transferencias.gestionar'), 403);
@@ -121,6 +129,33 @@ new #[Title('Venta')] class extends Component {
             @endif
         </flux:card>
     </div>
+
+    {{-- PBI-12: comprobantes al comprador, solo con su consentimiento --}}
+    <flux:card class="flex flex-wrap items-center justify-between gap-4">
+        <div>
+            <flux:heading size="lg">Comprobantes para el comprador</flux:heading>
+            @if ($venta->comprador->consentimiento_comprobante)
+                <flux:text class="text-sm">
+                    {{ $venta->comprador->nombre }} autorizó recibirlos el {{ $venta->comprador->consentimiento_at?->format('d/m/Y') }}.
+                    @unless ($venta->comprador->whatsapp()) Sin teléfono válido para WhatsApp. @endunless
+                </flux:text>
+            @else
+                <flux:text class="text-sm">Pregunta al comprador si autoriza recibir sus comprobantes y estado de cuenta. Sin su consentimiento no se generan.</flux:text>
+            @endif
+        </div>
+        <div class="flex flex-wrap gap-2">
+            @if ($venta->comprador->consentimiento_comprobante)
+                <flux:button icon="document-arrow-down" :href="route('ventas.estado-cuenta', $venta)" target="_blank">Estado de cuenta (PDF)</flux:button>
+                @canany(['ventas.registrar', 'cobros.registrar'])
+                    <flux:button variant="ghost" size="sm" wire:click="cambiarConsentimiento(false)" wire:confirm="¿Retirar el consentimiento del comprador?">Retirar consentimiento</flux:button>
+                @endcanany
+            @else
+                @canany(['ventas.registrar', 'cobros.registrar'])
+                    <flux:button variant="primary" icon="check" wire:click="cambiarConsentimiento(true)">El comprador autoriza</flux:button>
+                @endcanany
+            @endif
+        </div>
+    </flux:card>
 
     @if (! $venta->transferencia && $venta->vehiculo->estado === 'vendido')
         @can('transferencias.gestionar')
@@ -223,7 +258,13 @@ new #[Title('Venta')] class extends Component {
                             </flux:table.cell>
                             <flux:table.cell align="end">
                                 @if ($cobro->comprobante_path)
-                                    <flux:button size="xs" variant="ghost" icon="photo" :href="route('cobros.comprobante', $cobro)" target="_blank" />
+                                    <flux:button size="xs" variant="ghost" icon="photo" :href="route('cobros.comprobante', $cobro)" target="_blank" title="Captura del QR" />
+                                @endif
+                                @if ($venta->comprador->consentimiento_comprobante && $cobro->medio !== 'carga_inicial')
+                                    <flux:button size="xs" variant="ghost" icon="document-text" :href="route('cobros.pdf', $cobro)" target="_blank" title="Comprobante PDF" />
+                                    @if ($wa = app(\App\Servicios\Comprobantes::class)->enlaceWhatsApp($cobro))
+                                        <flux:button size="xs" variant="ghost" icon="chat-bubble-left-right" :href="$wa" target="_blank" title="Enviar por WhatsApp" />
+                                    @endif
                                 @endif
                                 @if ($cobro->porConfirmar())
                                     @can('cobros.confirmar')

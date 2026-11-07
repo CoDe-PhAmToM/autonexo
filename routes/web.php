@@ -75,6 +75,15 @@ Route::middleware(['auth'])->group(function () {
         Route::get('carga-inicial/plantilla', fn () => Excel::download(new PlantillaCarga, 'plantilla_autonexo.xlsx'))->name('carga.plantilla');
     });
 
+    // PBI-12: comprobante y estado de cuenta (requieren el consentimiento del comprador)
+    Route::middleware('can:ver-ventas')->group(function () {
+        Route::get('cobros/{cobro}/pdf', fn (Cobro $cobro) => app(\App\Servicios\Comprobantes::class)->pdfDelCobro($cobro))->name('cobros.pdf');
+        Route::get('ventas/{venta}/estado-de-cuenta', fn (\App\Models\Venta $venta) => app(\App\Servicios\Comprobantes::class)->pdfEstadoDeCuenta($venta))->name('ventas.estado-cuenta');
+    });
+
+    // PBI-23: medición de uso
+    Volt::route('medicion', 'metricas.index')->middleware('can:metricas.ver')->name('metricas.index');
+
     // PBI-08: cartera y mora
     Volt::route('cartera', 'cartera.index')->middleware('can:cartera.ver')->name('cartera.index');
 

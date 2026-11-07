@@ -76,5 +76,8 @@ class VentasDemoSeeder extends Seeder
 
         auth()->setUser($vendedor);
         app(\App\Servicios\Transferencias::class)->iniciar($antigua, today()->subWeekdays(9)->toDateString());
+
+        // PBI-12: el primer comprador autorizó recibir comprobantes.
+        $antigua->comprador->registrarConsentimiento(true);
     }
 }

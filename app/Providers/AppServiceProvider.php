@@ -37,6 +37,7 @@ class AppServiceProvider extends ServiceProvider
             'venta' => \App\Models\Venta::class,
             'cobro' => \App\Models\Cobro::class,
             'transferencia' => \App\Models\Transferencia::class,
+            'comprador' => \App\Models\Comprador::class,
         ]);
 
         // PBI-21: cada respaldo deja su resultado; los fallidos quedan visibles.
