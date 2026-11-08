@@ -7,6 +7,8 @@ Desarrollo: Jhon Kevin Laura López.
 
 Construye los **17 PBI del MVP** del Entregable Parcial I, en el orden del **backlog v2** del documento de Kanban.
 
+> **¿Vas a presentar o explicar el sistema?** Lee la [Guía de AutoNexo](GUIA.md): qué hace cada pantalla, cómo funciona por dentro, un guion de 10 minutos y las preguntas probables del docente.
+
 ---
 
 ## Stack
@@ -17,7 +19,7 @@ Construye los **17 PBI del MVP** del Entregable Parcial I, en el orden del **bac
 | Pantallas | Livewire 3 (Volt) + Flux + Tailwind CSS 4 |
 | Base de datos | PostgreSQL |
 | Librerías | spatie/laravel-permission (roles), maatwebsite/excel (carga y exportación), barryvdh/laravel-dompdf (PDF), spatie/laravel-backup (respaldo) |
-| Pruebas | Pest 4: **454 pruebas** |
+| Pruebas | Pest 4: **461 pruebas** |
 
 ## Instalación (Windows)
 
@@ -90,7 +92,7 @@ Para enviarlos de verdad con Gmail:
 | Comando | Para qué |
 |---|---|
 | `php artisan autonexo:demo` | Borra la base y carga los datos de demostración (pide confirmación) |
-| `php artisan test` | Corre las 454 pruebas sobre la base `autonexo_test` |
+| `php artisan test` | Corre las 461 pruebas sobre la base `autonexo_test` |
 | `php artisan test --filter=CalculadoraDePlan` | Informe del spike PBI-01 (300 casos) |
 | `php artisan autonexo:probar-restauracion --generar` | Respalda, restaura en una base limpia y compara conteos y saldos (CA-21) |
 | `npm run build` | Recompila los estilos si no usas `composer run dev` |
